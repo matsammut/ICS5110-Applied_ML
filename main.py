@@ -11,9 +11,9 @@ import joblib
 file_path = 'adult.csv'
 data = pd.read_csv(file_path)
 
-##########################################################################################################################################  
+####################################################################################################################
 #FIND THE ROWS THAT HAVE ? AND 99999 AND REMOVE THOSE ROWS 
-##########################################################################################################################################
+######################################################################################################################
 # Identify and save rows with '?' or 99999 before replacement
 problematic_rows = data[(data == '?') | (data == 99999)].any(axis=1)
 rows_to_save = data[problematic_rows]
@@ -23,7 +23,7 @@ print(len(rows_to_save))
 # Print summary of saved data
 print(f"\nSaved {len(rows_to_save)} rows with '?' or 99999 to 'problematic_rows.csv'")
 
-# Create clean dataset by removing problematic rows
+# Create clean dataset by removing problematic
 clean_data = data[~problematic_rows].copy()
 
 print(f"\nOriginal dataset size: {len(data)}")
@@ -39,8 +39,6 @@ remaining_questions = (clean_data == '?').sum().sum()
 remaining_nines = (clean_data == 99999).sum().sum()
 print(f"\nVerification - remaining problematic values: {remaining_questions + remaining_nines}")
 
-
-##########################################################################################################################################
 
 
 #########################################################################
