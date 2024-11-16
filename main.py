@@ -26,7 +26,6 @@ print(f"\nSaved {len(rows_to_save)} rows with '?' or 99999 to 'problematic_rows.
 # Create clean dataset by removing problematic rows
 clean_data = data[~problematic_rows].copy()
 
-# Print summary of the clean dataset
 print(f"\nOriginal dataset size: {len(data)}")
 print(f"Rows removed: {len(rows_to_save)}")
 print(f"Clean dataset size: {len(clean_data)}")
