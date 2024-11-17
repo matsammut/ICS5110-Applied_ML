@@ -51,14 +51,31 @@ for ax in axes[num_features:]:
 
 plt.tight_layout()
 plt.show()
-import pandas as pd
 
-# Load the dataset
-file_path = 'adult.csv'
-data = pd.read_csv(file_path)
 
-# Calculate the percentage of each native country
-native_country_percentages = data['native-country'].value_counts(normalize=True) * 100
+# Show the plot
+plt.show()
+#######################################
+from sklearn.preprocessing import LabelEncoder
 
-# Display the percentages
-print(native_country_percentages)
+# Encode categorical columns with label encoding
+label_encoders = {}
+for col in categorical_cols:
+    le = LabelEncoder()
+    data[col] = le.fit_transform(data[col])
+    label_encoders[col] = le
+
+# Calculate the correlation matrix
+corr_matrix = data.corr()
+
+# Create the heatmap
+plt.figure(figsize=(12, 10))
+sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', cbar=True)
+
+# Add title and labels
+plt.title('Correlation Heatmap')
+plt.xlabel('Features')
+plt.ylabel('Features')
+
+# Show the plot
+plt.show()
