@@ -1,0 +1,64 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import matplotlib.pyplot as plt
+print(plt.style.available)
+# Load the dataset
+file_path = 'adult.csv'
+data = pd.read_csv(file_path)
+
+# Plot settings
+plt.style.use('seaborn-v0_8-darkgrid')
+plt.rcParams['figure.figsize'] = (20, 10)
+
+# Separate numerical and categorical columns
+numerical_cols = data.select_dtypes(include=['int64', 'float64']).columns
+categorical_cols = data.select_dtypes(include=['object']).columns
+
+# Combine numerical and categorical columns
+all_cols = numerical_cols.union(categorical_cols)
+num_features = len(all_cols)
+
+# Determine grid size
+num_cols = 5  # Number of columns in the grid
+num_rows = (num_features + num_cols - 1) // num_cols  # Calculate number of rows needed
+
+# Plotting all features in a single grid
+fig, axes = plt.subplots(nrows=num_rows, ncols=num_cols, figsize=(20, 4 * num_rows))
+axes = axes.flatten()  # Flatten the 2D array of axes to 1D for easy iteration
+
+for ax, col in zip(axes, all_cols):
+    if col in numerical_cols:
+        sns.histplot(data[col].dropna(), kde=True, bins=30, ax=ax)
+        ax.set_title(f'Distribution of {col}')
+        ax.set_xlabel(col)
+        ax.set_ylabel('Frequency')
+    elif col in ['gender', 'income']:
+        # Create a pie chart for 'gender' and 'income'
+        data[col].value_counts().plot.pie(ax=ax, autopct='%1.1f%%', startangle=90)
+        ax.set_title(f'Proportion of {col}')
+        ax.set_ylabel('')  # Remove the y-label for pie charts
+    else:
+        # Use a bar chart for other categorical columns
+        sns.countplot(y=data[col], order=data[col].value_counts().index, ax=ax)
+        ax.set_title(f'Frequency of {col}')
+        ax.set_xlabel('Count')
+        ax.set_ylabel(col)
+
+# Hide any unused subplots
+for ax in axes[num_features:]:
+    ax.set_visible(False)
+
+plt.tight_layout()
+plt.show()
+import pandas as pd
+
+# Load the dataset
+file_path = 'adult.csv'
+data = pd.read_csv(file_path)
+
+# Calculate the percentage of each native country
+native_country_percentages = data['native-country'].value_counts(normalize=True) * 100
+
+# Display the percentages
+print(native_country_percentages)
