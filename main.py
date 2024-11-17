@@ -9,7 +9,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 import joblib
 
-# Load the dataset
+"""# Load the dataset
 file_path = 'adult.csv'
 data = pd.read_csv(file_path)
 
@@ -87,7 +87,7 @@ print(f"Accuracy: {acc_score}")
 #print(classification_report(y_test, y_test_pred))
 
 
-
+"""
 #################################################################################################
 #########################################################################
 #TRAIN THE KNN FOR WORKCLASS PREDICTION for PROBLEMATIC ROWS workclass 
