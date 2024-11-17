@@ -9,7 +9,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 import joblib
 
-"""# Load the dataset
+# Load the dataset
 file_path = 'adult.csv'
 data = pd.read_csv(file_path)
 
@@ -41,7 +41,7 @@ print(f"\nVerification - remaining problematic values: {remaining_questions + re
 
 
 
-"""
+
 
 #########################################################################
 #TRAIN THE KNN FOR WORKCLASS PREDICTION
@@ -87,7 +87,6 @@ print(f"Accuracy: {acc_score}")
 #print(classification_report(y_test, y_test_pred))
 
 
-"""
 #################################################################################################
 #########################################################################
 #TRAIN THE KNN FOR WORKCLASS PREDICTION for PROBLEMATIC ROWS workclass 
@@ -116,7 +115,6 @@ print("\nVerification:")
 print(f"Number of '?' remaining in workclass: {(problem_data['workclass'] == '?').sum()}")
 print("\nSample of updated workclass values:")
 print(problem_data['workclass'].head())
-
 
 #----------------------------------------------------------------------------------------------
 #########################################################################
@@ -340,5 +338,3 @@ total_values = len(final_data) * len(columns_to_compare)
 overall_similarity = (total_matches / total_values) * 100
 
 print(f"\nOverall similarity across all columns: {overall_similarity:.2f}%")
-
-"""
