@@ -79,3 +79,12 @@ plt.ylabel('Features')
 
 # Show the plot
 plt.show()
+
+# Display statistics for each column
+print("\nColumn Statistics:")
+print("-" * 50)
+for col in all_cols:
+    print(f"\n{col}:")
+    print(f"Mean: {data[col].mean():.2f}")
+    print(f"Median: {data[col].median():.2f}")
+    print(f"Mode: {data[col].mode().iloc[0]}")
