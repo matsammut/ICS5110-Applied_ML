@@ -52,9 +52,26 @@ for ax in axes[num_features:]:
 plt.tight_layout()
 plt.show()
 
-
 # Show the plot
 plt.show()
+
+# Create box plots for all columns
+plt.figure(figsize=(20, 4 * num_rows))
+fig, axes = plt.subplots(nrows=num_rows, ncols=num_cols, figsize=(20, 4 * num_rows))
+axes = axes.flatten()
+
+for ax, col in zip(axes, all_cols):
+    sns.boxplot(y=data[col], ax=ax)
+    ax.set_title(f'Box Plot of {col}')
+    ax.set_ylabel(col)
+
+# Hide any unused subplots
+for ax in axes[num_features:]:
+    ax.set_visible(False)
+
+plt.tight_layout()
+plt.show()
+
 #######################################
 from sklearn.preprocessing import LabelEncoder
 
