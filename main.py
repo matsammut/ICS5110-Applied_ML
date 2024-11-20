@@ -9,315 +9,176 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 import joblib
 
-# Load the dataset
-file_path = 'adult.csv'
-data = pd.read_csv(file_path)
-
-# Identify and save rows with '?' or 99999 before replacement
-problematic_rows = data[(data == '?') | (data == 99999)].any(axis=1)
-rows_to_save = data[problematic_rows]
-rows_to_save.to_csv('problematic_rows.csv', index=False)
-print(len(rows_to_save))
-
-# Print summary of saved data
-print(f"\nSaved {len(rows_to_save)} rows with '?' or 99999 to 'problematic_rows.csv'")
-
-# Create clean dataset by removing problematic rows
-clean_data = data[~problematic_rows].copy()
-
-# Print summary of the clean dataset
-print(f"\nOriginal dataset size: {len(data)}")
-print(f"Rows removed: {len(rows_to_save)}")
-print(f"Clean dataset size: {len(clean_data)}")
-
-# Save clean dataset
-clean_data.to_csv('clean_data.csv', index=False)
-print("\nClean dataset saved to 'clean_data.csv'")
-
-# Verify no '?' or 99999 remain in clean_data
-remaining_questions = (clean_data == '?').sum().sum()
-remaining_nines = (clean_data == 99999).sum().sum()
-print(f"\nVerification - remaining problematic values: {remaining_questions + remaining_nines}")
-
-
-
-
-
-#########################################################################
-#TRAIN THE KNN FOR WORKCLASS PREDICTION
-#########################################################################
-# Load the clean dataset
-clean_data = pd.read_csv('clean_data.csv')
-
-####
-#SPLIT THE FEATURES AND THE TARGET VALUES 
-X = clean_data.iloc[:, [3, 4, 8, 9, 12, 14]]
-y = clean_data.iloc[:, 1]
-
-
-###################################################################################################                                                     
-column_names = X.columns
-print(column_names)
-
-#perform label encoding to columns 
-for column in column_names[[0, 2, 3, 5]]:  # Indices in X, not in quotes
-    le_x = LabelEncoder()
-    X[column] = le_x.fit_transform(X[column])
-
-
-#####
-#perform label encoding to the target 
-le_y = LabelEncoder()
-y = le_y.fit_transform(y)
-
-#################################################################################################
-#split the data into training and testing 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)   
-
-#################################################################################################
-#train the KNN model 
-knn = KNeighborsClassifier(n_neighbors=100)
-knn.fit(X_train, y_train)   
-
-#################################################################################################
-#evaluate the model 
-y_test_pred = knn.predict(X_test)
-acc_score=accuracy_score(y_test, y_test_pred)
-print(f"Accuracy: {acc_score}")
-#print(classification_report(y_test, y_test_pred))
-
-
-#################################################################################################
-#########################################################################
-#TRAIN THE KNN FOR WORKCLASS PREDICTION for PROBLEMATIC ROWS workclass 
-#########################################################################
-problem_data = pd.read_csv('problematic_rows.csv')
-#create X for the problematic rows 
-problem_X = problem_data.iloc[:, [3, 4, 8, 9, 12, 14]]  
-
-#perform label encoding to the problematic rows 
-for column in column_names[[0, 2, 3, 5]]:  # Indices in X, not in quotes
-    le_x = LabelEncoder()
-    problem_X[column] = le_x.fit_transform(problem_X[column])
-
-#make predictions for the problematic rows 
-problem_predictions = knn.predict(problem_X)
-
-# Replace '?' with predictions in the original problematic data
-mask = problem_data['workclass'] == '?'  # Find rows where workclass is '?'
-problem_data.loc[mask, 'workclass'] = le_y.inverse_transform(problem_predictions[mask])
-
-# Save the updated problematic rows
-problem_data.to_csv('problematic_rows_updated.csv', index=False)
-
-# Verification
-print("\nVerification:")
-print(f"Number of '?' remaining in workclass: {(problem_data['workclass'] == '?').sum()}")
-print("\nSample of updated workclass values:")
-print(problem_data['workclass'].head())
-
-#----------------------------------------------------------------------------------------------
-#########################################################################
-#TRAIN THE KNN FOR OCCUPATION PREDICTION
-#########################################################################
-import pandas as pd
-import numpy as np
-from sklearn.preprocessing import OneHotEncoder, LabelEncoder
-from sklearn.compose import ColumnTransformer
-from sklearn.model_selection import train_test_split
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import accuracy_score
-
-# Load the dataset
-data = pd.read_csv('clean_data.csv')
-
-# Split the features and the target
-X = data.iloc[:, [1, 3, 4, 8, 9, 12, 14]]
-y = data.iloc[:, 6]
-
-# Store original column names for the selected features
-column_names = X.columns
-print("Original column names:", column_names)
-
-# First, perform label encoding on all categorical passthrough columns
-categorical_cols = [0, 1,2, 5]  # workclass, education, hours-per-week
-
-# Label encode all categorical columns in passthrough
-for col in [3, 4,6]:  # race, gender, and income columns
-    le = LabelEncoder()
-    X.iloc[:, col] = le.fit_transform(X.iloc[:, col])
-
-# Now apply the ColumnTransformer with OneHotEncoder
-ct = ColumnTransformer(
-    transformers=[('encoder', OneHotEncoder(), categorical_cols)],
-    remainder='passthrough'
-)
-
-# Fit and transform X
-X = ct.fit_transform(X).toarray()
-
-# Add this before the KNN training
-le_y = LabelEncoder()
-y = le_y.fit_transform(y)
-
-#########################################################################################
-#split the data into training and testing 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=0)   
-
-#########################################################################################
-
-
-#train the KNN model 
-knn_occupation = KNeighborsClassifier(n_neighbors=10)
-knn_occupation.fit(X_train, y_train)   
-#########################################################################################
-#evaluate the model 
-y_test_pred = knn_occupation.predict(X_test)
-acc_score=accuracy_score(y_test, y_test_pred)
-print(f"Accuracy: {acc_score}")
-print(classification_report(y_test, y_test_pred))
-#########################################################################################
-
-
-
-#########################################################################
-#predict THE KNN FOR OCCUPATION PREDICTION
-#########################################################################
-
-data = pd.read_csv('problematic_rows_updated.csv')
-
-#create X for the problematic rows 
-problem_X = data.iloc[:, [1, 3, 4, 8, 9, 12, 14]]   
-print(problem_X.columns)  
-
-# First, perform label encoding on all categorical passthrough columns
-categorical_cols = [0, 1, 2, 5]  # workclass, education, hours-per-week
-
-# Label encode all categorical columns in passthrough
-for col in [3, 4, 6]:  # race, gender, and income columns
-    le = LabelEncoder()
-    problem_X.iloc[:, col] = le.fit_transform(problem_X.iloc[:, col])
-
-# Now apply the same ColumnTransformer (use the one already fitted)
-problem_X = ct.transform(problem_X).toarray()
-
-# Now you can make predictions using knn_occupation
-predictions = knn_occupation.predict(problem_X)
-#
-
-# Replace '?' with predictions in the original problematic data
-mask = data['occupation'] == '?'  # Find rows where occupation is '?'
-data.loc[mask, 'occupation'] = le_y.inverse_transform(predictions[mask])
-
-# Save the updated problematic rows
-data.to_csv('problematic_rows_occupation_update.csv', index=False)
-
-# Verification
-print("\nVerification:")
-print(f"Number of '?' remaining in occupation: {(data['occupation'] == '?').sum()}")
-print("\nSample of updated occupation values:")
-print(data['occupation'].head())
-
-
-
-##########################################################################################  
-
-
-#########################################################################
-#TRAIN THE KNN FOR native-country 
-#########################################################################
-
-
-#load the dataset 
-data = pd.read_csv('clean_data.csv')
-#########################################################################################
-#get the features and the target 
-X = data.iloc[:, [0,1, 3, 4,6, 8, 9, 14]]
-y = data.iloc[:, 13]
-
-
-# Store original column names for the selected features
-column_names = X.columns
-print("Original column names:", column_names)
-
-# First, perform label encoding on all categorical passthrough columns
-categorical_cols = [0, 1,2, 3,4]  # workclass, education, hours-per-week
-
-# Label encode all categorical columns in passthrough
-for col in [5, 6,7]:  # race, gender, and income columns
-    le = LabelEncoder()
-    X.iloc[:, col] = le.fit_transform(X.iloc[:, col])
-
-# Now apply the ColumnTransformer with OneHotEncoder
-ct = ColumnTransformer(
-    transformers=[('encoder', OneHotEncoder(), categorical_cols)],
-    remainder='passthrough'
-)
-
-# Fit and transform X
-X = ct.fit_transform(X).toarray()
-
-# Add this before the KNN training
-le_y = LabelEncoder()
-y = le_y.fit_transform(y)
-
-#########################################################################################
-#split the data into training and testing 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=0)   
-
-#########################################################################################
-
-#train the KNN model 
-knn_native_country = KNeighborsClassifier(n_neighbors=5)
-knn_native_country.fit(X_train, y_train)       
-
-#########################################################################################
-#evaluate the model 
-y_test_pred = knn_native_country.predict(X_test)
-acc_score=accuracy_score(y_test, y_test_pred)
-print(f"Accuracy: {acc_score}")
-print(classification_report(y_test, y_test_pred))
-
-
-#########################################################################
-#predict THE native-country PREDICTION
-#########################################################################
-
-data_2 = pd.read_csv('problematic_rows_occupation_update.csv')    
-problem_X = data_2.iloc[:, [0,1, 3, 4,6, 8, 9, 14]]   
-
-# Label encode the categorical columns in passthrough
-for col in [5, 6, 7]:  # race, gender, and income columns
-    le = LabelEncoder()
-    problem_X.iloc[:, col] = le.fit_transform(problem_X.iloc[:, col])
-
-# Use the already fitted ColumnTransformer instead of creating a new one
-problem_X = ct.transform(problem_X).toarray()
-
-#########################################################################################
-#prediction for native-country 
-predictions = knn_native_country.predict(problem_X)
-
-# Replace '?' with predictions in the original problematic data
-mask = data_2['native-country'] == '?'  # Find rows where native-country is '?'
-data_2.loc[mask, 'native-country'] = le_y.inverse_transform(predictions[mask])
-
-# Save the updated problematic rows
-data_2.to_csv('problematic_rows_final.csv', index=False)
-
-# Verification
-print("\nVerification:")
-print(f"Number of '?' remaining in native-country: {(data_2['native-country'] == '?').sum()}")
-print("\nSample of updated native-country values:")
-print(data_2['native-country'].head())
-
-#########################################################################################
-
-
-
-# Load both CSV files
+def cleaned_data_function(file_path):
+    data = pd.read_csv(file_path)
+
+    # Identify and save rows with '?' or 99999 before replacement
+    problematic_rows = data[(data == '?') | (data == 99999)].any(axis=1)
+    rows_to_save = data[problematic_rows]
+    rows_to_save.to_csv('problematic_rows.csv', index=False)
+    print(len(rows_to_save))
+
+    # Print summary of saved data
+    # Create clean dataset by removing problematic rows
+    clean_data = data[~problematic_rows].copy()
+
+    # Print summary of the clean dataset
+    print(f"\nOriginal dataset size: {len(data)}")
+    print(f"Rows removed: {len(rows_to_save)}")
+    print(f"Clean dataset size: {len(clean_data)}")
+
+    # Save clean dataset
+    clean_data.to_csv('clean_data.csv', index=False)
+    
+
+    # Verify no '?' or 99999 remain in clean_data
+    remaining_questions = (clean_data == '?').sum().sum()
+    remaining_nines = (clean_data == 99999).sum().sum()
+    print(f"\nVerification - remaining problematic values: {remaining_questions + remaining_nines}")
+
+
+def knn_workclass_train(feature_columns,target_column='workclass'):
+    
+    clean_data = pd.read_csv('clean_data.csv')
+    
+    # SPLIT THE FEATURES AND THE TARGET VALUES 
+    X = clean_data[feature_columns].copy()
+    y = clean_data[target_column]
+
+    ###################################################################################################                                                     
+    column_names = X.columns
+    print(f"The columns to be used are {column_names}")
+
+    # Label encode gender and income
+    label_cols = ['gender', 'income']
+    for column in label_cols:
+        le_x = LabelEncoder()
+        X[column] = le_x.fit_transform(X[column])
+
+    # One-hot encode education and race
+    onehot_cols = ['education', 'race']
+    ct = ColumnTransformer([('onehot', OneHotEncoder(drop='first', sparse_output=False), onehot_cols)], remainder='passthrough')
+    
+    # Transform the data and create new dataframe with proper column names
+    X_encoded = ct.fit_transform(X)
+    
+    # Get the new column names after one-hot encoding
+    onehot_feature_names = ct.named_transformers_['onehot'].get_feature_names_out(onehot_cols)
+    # Get the names of the columns that weren't transformed
+    passthrough_cols = [col for col in X.columns if col not in onehot_cols]
+    # Combine all column names
+    new_column_names = list(onehot_feature_names) + passthrough_cols
+    
+    # Convert to DataFrame with proper column names
+    X = pd.DataFrame(X_encoded, columns=new_column_names)
+
+    # Label encode the target
+    le_y = LabelEncoder()
+    y = le_y.fit_transform(y)
+
+    #################################################################################################
+    #split the data into training and testing 
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)   
+
+    #################################################################################################
+    #train the KNN model 
+    knn = KNeighborsClassifier(n_neighbors=100)
+    knn.fit(X_train, y_train)   
+
+    #evaluate the model 
+    y_test_pred = knn.predict(X_test)
+    acc_score=accuracy_score(y_test, y_test_pred)
+    print(f"Accuracy: {acc_score}")
+    
+    return knn  # Just return the trained model
+
+def prediction_function(knn, target_column='workclass', feature_columns=['age','education','educational-num', 'race', 'gender', 'hours-per-week', 'income']):
+    # Try to read the running updated file, if it doesn't exist, use the original problematic rows
+    try:
+        updated_data = pd.read_csv('problematic_rows_running_updates.csv')
+    except FileNotFoundError:
+        updated_data = pd.read_csv('problematic_rows.csv')
+    
+    # Create X for the problematic rows
+    X = updated_data[feature_columns].copy()
+    
+    # Create label encoders dictionary
+    label_encoders = {}
+    
+    # Instead of one-hot encoding, use the same label encoding as in training
+    for column in ['education', 'race', 'gender', 'income']:
+        label_encoders[column] = LabelEncoder()
+        X[column] = label_encoders[column].fit_transform(X[column])
+    
+    # Get the target column from the model
+    target = target_column
+    
+    print(f"\nProcessing {target}...")
+    
+    # Create label encoder for target column and fit it on the clean data
+    clean_data = pd.read_csv('clean_data.csv')
+    target_encoder = LabelEncoder()
+    target_encoder.fit(clean_data[target])
+    
+    # Use the passed model directly
+    mask = updated_data[target] == '?'
+    if mask.any():
+        predictions = knn.predict(X[mask])
+        # Convert numeric predictions back to text labels
+        text_predictions = target_encoder.inverse_transform(predictions)
+        updated_data.loc[mask, target] = text_predictions
+    
+    print(f"Number of '?' remaining in {target}: {(updated_data[target] == '?').sum()}")
+    print(f"Sample of updated {target} values:")
+    print(updated_data[target].head())
+    
+    # Save the running updated dataset
+    updated_data.to_csv('problematic_rows_running_updates.csv', index=False)
+    print(f"\nUpdated data saved to 'problematic_rows_running_updates.csv'")
+
+
+#column numbers from cleaned dataset
+"""
+0=age
+1=workclass
+2=fnlwgt
+3=education 
+4=education-num
+5=marital-status
+6=occupation
+7=relationship
+8=race
+9=gender
+10=capital-gain
+11=capital-loss
+12=hours-per-week
+13=native_country
+14=income 
+"""
+
+# Define specific feature sets for each target
+workclass_features =     [ 'age','education', 'race', 'gender', 'hours-per-week', 'income']
+occupation_features = ['age', 'education', 'educational-num', 'race', 'gender', 'hours-per-week', 'income']
+native_country_features = ['age', 'education', 'educational-num', 'race', 'gender', 'hours-per-week', 'income']
+
+# Step 1: load the adult dataset, find all the ? and 99999 and replace them with nan 
+cleaned_data_function(file_path = 'adult.csv')
+
+# Train and predict for workclass
+knn_workclass = knn_workclass_train(feature_columns=workclass_features,target_column='workclass')
+#prediction_function(knn_workclass, target_column='workclass', feature_columns=workclass_features)
+"""
+# Train and predict for occupation
+knn_occupation = knn_workclass_train(feature_columns=occupation_features,target_column='occupation')
+prediction_function(knn_occupation, target_column='occupation', feature_columns=occupation_features)
+
+# Train and predict for native-country
+knn_native = knn_workclass_train(feature_columns=native_country_features,target_column='native-country')
+prediction_function(knn_native, target_column='native-country', feature_columns=native_country_features)
+
+# Load both CSV files and compare results
 imputed_data = pd.read_csv('imputed_dataset.csv')
-final_data = pd.read_csv('problematic_rows_final.csv')
+final_data = pd.read_csv('problematic_rows_running_updates.csv')
 
 # Columns to compare
 columns_to_compare = ['workclass', 'occupation', 'native-country']
@@ -338,3 +199,4 @@ total_values = len(final_data) * len(columns_to_compare)
 overall_similarity = (total_matches / total_values) * 100
 
 print(f"\nOverall similarity across all columns: {overall_similarity:.2f}%")
+"""
