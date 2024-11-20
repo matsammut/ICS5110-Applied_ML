@@ -107,13 +107,33 @@ def prediction_function(knn, target_column='workclass', feature_columns=['age','
     # Create X for the problematic rows
     X = updated_data[feature_columns].copy()
     
-    # Create label encoders dictionary
-    label_encoders = {}
+    # Label encode gender and income
+    label_cols = ['gender', 'income']
+    for column in label_cols:
+        le_x = LabelEncoder()
+        X[column] = le_x.fit_transform(X[column])
+
+    # Scale numerical columns
+    numerical_cols = ['age', 'educational-num', 'hours-per-week']
+    scaler = StandardScaler()
+    X[numerical_cols] = scaler.fit_transform(X[numerical_cols])
+
+    # One-hot encode education and race
+    onehot_cols = ['race', 'education']
+    ct = ColumnTransformer([('onehot', OneHotEncoder(drop='first', sparse_output=False), onehot_cols)], remainder='passthrough')
     
-    # Instead of one-hot encoding, use the same label encoding as in training
-    for column in ['education', 'race', 'gender', 'income']:
-        label_encoders[column] = LabelEncoder()
-        X[column] = label_encoders[column].fit_transform(X[column])
+    # Transform the data and create new dataframe with proper column names
+    X_encoded = ct.fit_transform(X)
+    
+    # Get the new column names after one-hot encoding
+    onehot_feature_names = ct.named_transformers_['onehot'].get_feature_names_out(onehot_cols)
+    # Get the names of the columns that weren't transformed
+    passthrough_cols = [col for col in X.columns if col not in onehot_cols]
+    # Combine all column names
+    new_column_names = list(onehot_feature_names) + passthrough_cols
+    
+    # Convert to DataFrame with proper column names
+    X = pd.DataFrame(X_encoded, columns=new_column_names)
     
     # Get the target column from the model
     target = target_column
