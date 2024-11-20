@@ -37,7 +37,7 @@ def cleaned_data_function(file_path):
     print(f"\nVerification - remaining problematic values: {remaining_questions + remaining_nines}")
 
 
-def knn_workclass_train(feature_columns,target_column='workclass'):
+def knn_workclass_train(feature_columns,target_column):
     
     clean_data = pd.read_csv('clean_data.csv')
     
@@ -55,8 +55,13 @@ def knn_workclass_train(feature_columns,target_column='workclass'):
         le_x = LabelEncoder()
         X[column] = le_x.fit_transform(X[column])
 
+    # Scale numerical columns
+    numerical_cols = ['age', 'educational-num', 'hours-per-week']
+    scaler = StandardScaler()
+    X[numerical_cols] = scaler.fit_transform(X[numerical_cols])
+
     # One-hot encode education and race
-    onehot_cols = ['education', 'race']
+    onehot_cols = ['race', 'education']
     ct = ColumnTransformer([('onehot', OneHotEncoder(drop='first', sparse_output=False), onehot_cols)], remainder='passthrough')
     
     # Transform the data and create new dataframe with proper column names
@@ -70,15 +75,15 @@ def knn_workclass_train(feature_columns,target_column='workclass'):
     new_column_names = list(onehot_feature_names) + passthrough_cols
     
     # Convert to DataFrame with proper column names
-    X = pd.DataFrame(X_encoded, columns=new_column_names)
-
+    X_encoded_df = pd.DataFrame(X_encoded, columns=new_column_names)
+    
     # Label encode the target
     le_y = LabelEncoder()
     y = le_y.fit_transform(y)
 
     #################################################################################################
     #split the data into training and testing 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)   
+    X_train, X_test, y_train, y_test = train_test_split(X_encoded_df, y, test_size=0.1, random_state=42)   
 
     #################################################################################################
     #train the KNN model 
@@ -157,7 +162,7 @@ def prediction_function(knn, target_column='workclass', feature_columns=['age','
 """
 
 # Define specific feature sets for each target
-workclass_features =     [ 'age','education', 'race', 'gender', 'hours-per-week', 'income']
+workclass_features = ['age','education', 'educational-num', 'race', 'gender', 'hours-per-week', 'income']
 occupation_features = ['age', 'education', 'educational-num', 'race', 'gender', 'hours-per-week', 'income']
 native_country_features = ['age', 'education', 'educational-num', 'race', 'gender', 'hours-per-week', 'income']
 
@@ -167,7 +172,7 @@ cleaned_data_function(file_path = 'adult.csv')
 # Train and predict for workclass
 knn_workclass = knn_workclass_train(feature_columns=workclass_features,target_column='workclass')
 #prediction_function(knn_workclass, target_column='workclass', feature_columns=workclass_features)
-"""
+
 # Train and predict for occupation
 knn_occupation = knn_workclass_train(feature_columns=occupation_features,target_column='occupation')
 prediction_function(knn_occupation, target_column='occupation', feature_columns=occupation_features)
@@ -199,4 +204,3 @@ total_values = len(final_data) * len(columns_to_compare)
 overall_similarity = (total_matches / total_values) * 100
 
 print(f"\nOverall similarity across all columns: {overall_similarity:.2f}%")
-"""
