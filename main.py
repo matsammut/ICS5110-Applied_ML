@@ -97,7 +97,7 @@ def knn_workclass_train(feature_columns,target_column):
     
     return knn  # Just return the trained model
 
-def prediction_function(knn, target_column='workclass', feature_columns=['age','education','educational-num', 'race', 'gender', 'hours-per-week', 'income']):
+def prediction_function(knn, target_column, feature_columns=['age','education','educational-num', 'race', 'gender', 'hours-per-week', 'income']):
     # Try to read the running updated file, if it doesn't exist, use the original problematic rows
     try:
         updated_data = pd.read_csv('problematic_rows_running_updates.csv')
@@ -154,7 +154,7 @@ def prediction_function(knn, target_column='workclass', feature_columns=['age','
         updated_data.loc[mask, target] = text_predictions
     
     print(f"Number of '?' remaining in {target}: {(updated_data[target] == '?').sum()}")
-    print(f"Sample of updated {target} values:")
+    
     print(updated_data[target].head())
     
     # Save the running updated dataset
@@ -190,13 +190,13 @@ native_country_features = ['age', 'education', 'educational-num', 'race', 'gende
 cleaned_data_function(file_path = 'adult.csv')
 
 # Train and predict for workclass
-knn_workclass = knn_workclass_train(feature_columns=workclass_features,target_column='workclass')
+#knn_workclass = knn_workclass_train(feature_columns=workclass_features,target_column='workclass')
 #prediction_function(knn_workclass, target_column='workclass', feature_columns=workclass_features)
 
 # Train and predict for occupation
 knn_occupation = knn_workclass_train(feature_columns=occupation_features,target_column='occupation')
 prediction_function(knn_occupation, target_column='occupation', feature_columns=occupation_features)
-
+"""
 # Train and predict for native-country
 knn_native = knn_workclass_train(feature_columns=native_country_features,target_column='native-country')
 prediction_function(knn_native, target_column='native-country', feature_columns=native_country_features)
@@ -223,4 +223,4 @@ total_matches = sum(final_data[col] == imputed_data.loc[final_data.index, col] f
 total_values = len(final_data) * len(columns_to_compare)
 overall_similarity = (total_matches / total_values) * 100
 
-print(f"\nOverall similarity across all columns: {overall_similarity:.2f}%")
+print(f"\nOverall similarity across all columns: {overall_similarity:.2f}%")"""
