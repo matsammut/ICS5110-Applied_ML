@@ -1,10 +1,10 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import matplotlib.pyplot as plt
+import numpy as np
 print(plt.style.available)
 # Load the dataset
-file_path = 'adult.csv'
+file_path = 'complete_dataset.csv'
 data = pd.read_csv(file_path)
 
 # Plot settings
@@ -105,3 +105,38 @@ for col in all_cols:
     print(f"Mean: {data[col].mean():.2f}")
     print(f"Median: {data[col].median():.2f}")
     print(f"Mode: {data[col].mode().iloc[0]}")
+
+# Create a scatter plot for age vs income, colored by workclass
+plt.figure(figsize=(12, 8))
+
+# Get unique workclass values
+unique_workclass = data['workclass'].unique()
+
+# Create a color map for workclass categories
+colors = plt.cm.rainbow(np.linspace(0, 1, len(unique_workclass)))
+
+# Plot points for each workclass
+for workclass, color in zip(unique_workclass, colors):
+    mask = data['workclass'] == workclass
+    plt.scatter(data.loc[mask, 'age'], 
+               data.loc[mask, 'income'],
+               color=color,
+               label=f'Workclass {workclass}',
+               alpha=0.6)
+
+# Customize the plot
+plt.xlabel('Age')
+plt.ylabel('Income (0: ≤50K, 1: >50K)')
+plt.title('Income vs Age by Workclass')
+plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.grid(True, alpha=0.3)
+
+# Adjust layout to prevent label cutoff
+plt.tight_layout()
+plt.show()
+
+
+
+# Add small random noise to work
+
+
