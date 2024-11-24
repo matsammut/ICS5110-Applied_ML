@@ -3,23 +3,13 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder
 from sklearn.impute import KNNImputer
 
-# Load the dataset
-file_path = 'adult.csv'
-data = pd.read_csv(file_path)
-
-# Check for '?' values in each column
-question_marks = (data == '?').sum()
-print("\nColumns with '?' values:")
-print(question_marks[question_marks > 0])
-
-# Check for '99999' values in each column
-missing_99999 = (data == 99999).sum()
-print("\nColumns with '99999' values:")
-print(missing_99999[missing_99999 > 0])
+data = pd.read_csv('adult.csv')
 
 # Replace both '?' and 99999 with np.nan
-data.replace(["?", 99999], np.nan, inplace=True)
-data = data.replace('nan', np.nan)
+data = data.replace(["?", 99999], np.nan, inplace=True)
+
+# Discuss why 5 was chosen
+# hyperpapremet testing
 
 def impute_column(data, target_col, feature_cols, n_neighbors=5):
     print(f"\nImputing {target_col}")
@@ -56,6 +46,7 @@ def impute_column(data, target_col, feature_cols, n_neighbors=5):
     
     print(f"Missing values after imputation: {data[target_col].isnull().sum()}")
     return data
+
 
 # Impute workclass using more demographic and education features
 data = impute_column(data, 
