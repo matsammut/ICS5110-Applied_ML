@@ -9,7 +9,6 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score
-import joblib
 
 def cleaned_data_function(file_path):
     data = pd.read_csv(file_path)
@@ -134,7 +133,7 @@ def knn_workclass_train(feature_columns,target_column):
     X[numerical_cols] = scaler.fit_transform(X[numerical_cols])
 
     # One-hot encode education and race
-    onehot_cols = ['race', 'education']
+    onehot_cols = ['race']
     ct = ColumnTransformer([('onehot', OneHotEncoder(drop='first', sparse_output=False), onehot_cols)], remainder='passthrough')
     
     # Transform the data and create new dataframe with proper column names
@@ -194,7 +193,7 @@ def prediction_function(knn, target_column, feature_columns=['age','education','
     X[numerical_cols] = scaler.fit_transform(X[numerical_cols])
 
     # One-hot encode education and race
-    onehot_cols = ['race', 'education']
+    onehot_cols = ['race']
     ct = ColumnTransformer([('onehot', OneHotEncoder(drop='first', sparse_output=False), onehot_cols)], remainder='passthrough')
     
     # Transform the data and create new dataframe with proper column names
@@ -221,17 +220,19 @@ def prediction_function(knn, target_column, feature_columns=['age','education','
     target_encoder.fit(clean_data[target])
     
     # Use the passed model directly
-    mask = updated_data[target] == '?'
+    mask = (updated_data[target] == '?') | (updated_data[target] == 99999)
+
     if mask.any():
+        # Make predictions for rows with '?' or 99999
         predictions = knn.predict(X[mask])
-        # Convert numeric predictions back to text labels
+        # Convert numeric predictions back to text labels (if needed)
         text_predictions = target_encoder.inverse_transform(predictions)
         updated_data.loc[mask, target] = text_predictions
-    
-    print(f"Number of '?' remaining in {target}: {(updated_data[target] == '?').sum()}")
-    
+
+    print(f"Number of '?' or '99999' remaining in {target}: {((updated_data[target] == '?') | (updated_data[target] == 99999)).sum()}")
+
     print(updated_data[target].head())
-    
+
     # Save the running updated dataset
     updated_data.to_csv('problematic_rows_running_updates.csv', index=False)
     print(f"\nUpdated data saved to 'problematic_rows_running_updates.csv'")
@@ -257,15 +258,16 @@ def prediction_function(knn, target_column, feature_columns=['age','education','
 """
 
 # Define specific feature sets for each target
-workclass_features = ['age','education', 'educational-num', 'race', 'gender', 'hours-per-week', 'income']
-occupation_features = ['age', 'education', 'educational-num', 'race', 'gender', 'hours-per-week', 'income']
-native_country_features = ['age', 'education', 'educational-num', 'race', 'gender', 'hours-per-week', 'income']
+workclass_features = ['age', 'educational-num', 'race', 'gender', 'hours-per-week', 'income']
+occupation_features = ['age', 'educational-num', 'race', 'gender', 'hours-per-week', 'income']
+native_country_features = ['age', 'educational-num', 'race', 'gender', 'hours-per-week', 'income']
+capital_gain_features = ['age', 'educational-num', 'race', 'gender', 'hours-per-week', 'income']
+capital_loss_features = ['age', 'educational-num', 'race', 'gender', 'hours-per-week', 'income']
 
 # Step 1: load the adult dataset, find all the ? and 99999 and replace them with nan 
 cleaned_data_function(file_path = 'adult.csv')
 
 
-#fine_tuning(feature_columns=workclass_features,target_column='occupation')
 # Train and predict for workclass
 #knn_workclass = knn_workclass_train(feature_columns=workclass_features,target_column='workclass')
 #prediction_function(knn_workclass, target_column='workclass', feature_columns=workclass_features)
@@ -275,7 +277,6 @@ cleaned_data_function(file_path = 'adult.csv')
 
 # Train and predict for occupation
 #knn_occupation = knn_workclass_train(feature_columns=occupation_features,target_column='occupation')
-
 #prediction_function(knn_occupation,  feature_columns=occupation_features,target_column='occupation')
 
 
@@ -285,7 +286,16 @@ cleaned_data_function(file_path = 'adult.csv')
 #prediction_function(knn_native, target_column='native-country', feature_columns=native_country_features)
 
 ##used to select hte best paramters for every model change the target 
-fine_tuning(feature_columns=workclass_features,target_column='native-country')
+#fine_tuning(feature_columns=workclass_features,target_column='native-country')
+
+
+knn_capital_loss = knn_workclass_train(feature_columns=capital_loss_features,target_column='capital-loss')
+prediction_function(knn_capital_loss, target_column='capital-loss', feature_columns=capital_loss_features)
+
+
+knn_capital_gain = knn_workclass_train(feature_columns=capital_gain_features,target_column='capital-gain')
+prediction_function(knn_capital_gain, target_column='capital-gain', feature_columns=capital_gain_features)
+
 
 
 

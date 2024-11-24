@@ -36,7 +36,7 @@ def prepare_dataset(data):
 
     #split the data into training and testing sets
     X_train, X_test, y_train, y_test = train_test_split(X, encoded_y, test_size=0.1, random_state=42)
-    return X_train, X_test, y_train, y_test,feature_names
+    return X_train, X_test, y_train, y_test,feature_names,encoded_y
 
     #function used to test the best parameters for the decision tree
 def Test_best_paramters(X_train, y_train):
@@ -218,20 +218,20 @@ def fine_tune_random_forest(X_train, y_train):
 file_path = 'complete_dataset.csv'
 data = pd.read_csv(file_path)
 
-X_train,X_test,y_train,y_test,feature_names = prepare_dataset(data)
+X_train,X_test,y_train,y_test,feature_names,encoded_y = prepare_dataset(data)
 #split the features and target
 
 
 
 
 #best_model = Test_best_paramters(X_train, y_train)
-#Trained_decision_tree = train_decision_tree(X_train, y_train)
-#predict_model_decision_tree(Trained_decision_tree, X_test, y_test, y_encoder)
+Trained_decision_tree = train_decision_tree(X_train, y_train)
+predict_model_decision_tree(Trained_decision_tree, X_test, y_test, encoded_y)
 
 #best_estimator_random_forest = fine_tune_random_forest(X_train, y_train)
-Trained_random_forest_tree = train_random_forest_tree(X_train, y_train)
+#Trained_random_forest_tree = train_random_forest_tree(X_train, y_train)
 #analyze_feature_importance(model=Trained_random_forest_tree, feature_names=feature_names)
-predict_random_forest_tree(Trained_random_forest_tree, X_test, y_test)
+#predict_random_forest_tree(Trained_random_forest_tree, X_test, y_test)
 
 
 
