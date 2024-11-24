@@ -1,14 +1,11 @@
 import pandas as pd
-import numpy as np
 from sklearn.preprocessing import LabelEncoder, StandardScaler
-from sklearn.impute import KNNImputer
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import accuracy_score
 
 def cleaned_data_function(file_path):
     data = pd.read_csv(file_path)
@@ -23,19 +20,11 @@ def cleaned_data_function(file_path):
     # Create clean dataset by removing problematic rows
     clean_data = data[~problematic_rows].copy()
 
-    # Print summary of the clean dataset
-    print(f"\nOriginal dataset size: {len(data)}")
-    print(f"Rows removed: {len(rows_to_save)}")
-    print(f"Clean dataset size: {len(clean_data)}")
-
     # Save clean dataset
-    clean_data.to_csv('clean_data.csv', index=False)
+    clean_data.to_csv('clean_data.csv', index=False)#
+    return problematic_rows
     
 
-    # Verify no '?' or 99999 remain in clean_data
-    remaining_questions = (clean_data == '?').sum().sum()
-    remaining_nines = (clean_data == 99999).sum().sum()
-    print(f"\nVerification - remaining problematic values: {remaining_questions + remaining_nines}")
 def fine_tuning(feature_columns,target_column):
     clean_data = pd.read_csv('clean_data.csv')
     
@@ -157,9 +146,7 @@ def knn_workclass_train(feature_columns,target_column):
     #split the data into training and testing 
     X_train, X_test, y_train, y_test = train_test_split(X_encoded_df, y, test_size=0.1, random_state=42)   
 
-    #################################################################################################
     #train the KNN model 
-    knn = KNeighborsClassifier(n_neighbors=100)
     knn = KNeighborsClassifier(n_neighbors=100)
     knn.fit(X_train, y_train)  # Fit the model to the training data
 
@@ -288,17 +275,12 @@ cleaned_data_function(file_path = 'adult.csv')
 ##used to select hte best paramters for every model change the target 
 #fine_tuning(feature_columns=workclass_features,target_column='native-country')
 
-
 knn_capital_loss = knn_workclass_train(feature_columns=capital_loss_features,target_column='capital-loss')
 prediction_function(knn_capital_loss, target_column='capital-loss', feature_columns=capital_loss_features)
 
 
 knn_capital_gain = knn_workclass_train(feature_columns=capital_gain_features,target_column='capital-gain')
 prediction_function(knn_capital_gain, target_column='capital-gain', feature_columns=capital_gain_features)
-
-
-
-
 
 """
 # Load both CSV files and compare results
