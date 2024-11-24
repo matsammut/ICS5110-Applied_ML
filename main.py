@@ -24,82 +24,10 @@ def cleaned_data_function(file_path):
     clean_data.to_csv('clean_data.csv', index=False)#
     return problematic_rows
     
-
-def fine_tuning(feature_columns,target_column):
-    clean_data = pd.read_csv('clean_data.csv')
-    
-    # SPLIT THE FEATURES AND THE TARGET VALUES 
-    X = clean_data[feature_columns].copy()  
-    y = clean_data[target_column]
-
-    ###################################################################################################                                                     
-    column_names = X.columns
-    print(f"The columns to be used are {column_names}")
-
-    # Label encode gender and income
-    label_cols = ['gender', 'income']
-    for column in label_cols:
-        le_x = LabelEncoder()
-        X[column] = le_x.fit_transform(X[column])
-
-    # Scale numerical columns
-    numerical_cols = ['age', 'educational-num', 'hours-per-week']
-    scaler = StandardScaler()
-    X[numerical_cols] = scaler.fit_transform(X[numerical_cols])
-
-    # One-hot encode education and race
-    onehot_cols = ['race', 'education']
-    ct = ColumnTransformer([('onehot', OneHotEncoder(drop='first', sparse_output=False), onehot_cols)], remainder='passthrough')
-    
-    # Transform the data and create new dataframe with proper column names
-    X_encoded = ct.fit_transform(X)
-    
-    # Get the new column names after one-hot encoding
-    onehot_feature_names = ct.named_transformers_['onehot'].get_feature_names_out(onehot_cols)
-    # Get the names of the columns that weren't transformed
-    passthrough_cols = [col for col in X.columns if col not in onehot_cols]
-    # Combine all column names
-    new_column_names = list(onehot_feature_names) + passthrough_cols
-    
-    # Convert to DataFrame with proper column names
-    X_encoded_df = pd.DataFrame(X_encoded, columns=new_column_names)
-    
-    # Label encode the target
-    le_y = LabelEncoder()
-    y = le_y.fit_transform(y)
-
-    #################################################################################################
-    #split the data into training and testing 
-    X_train, X_test, y_train, y_test = train_test_split(X_encoded_df, y, test_size=0.1, random_state=42)   
-
-    #################################################################################################
-    #train the KNN model 
-    knn = KNeighborsClassifier()
-    param_grid = {
-        'n_neighbors': [5, 10, 15, 20,25,30,40, 50,60,70,80,90 ,100],  # Number of neighbors
-        'weights': ['uniform', 'distance'],  # Weighting function
-        'metric': ['euclidean', 'manhattan', 'minkowski']  # Distance metric
-    }
-    grid_search = GridSearchCV(
-        estimator=knn,
-        param_grid=param_grid,
-        cv=5,  # 5-fold cross-validation
-        scoring='accuracy',  # Optimize for accuracy
-        n_jobs=-1,  # Use all available cores
-        verbose=2
-    )
-
-    # Perform the grid search
-    grid_search.fit(X_train, y_train)
-
-    # Print the best parameters and the corresponding score
-    print("\nBest parameters found:")
-    print(grid_search.best_params_)
-    print(f"Best cross-validation accuracy: {grid_search.best_score_:.3f}")
-
-
-def knn_workclass_train(feature_columns,target_column):
-    
+def knn_workclass_train_predict(feature_columns, target_column):
+    """
+    Trains a KNN model on the clean dataset and uses it to predict missing values for the 'workclass' column.
+    """
     clean_data = pd.read_csv('clean_data.csv')
     
     # SPLIT THE FEATURES AND THE TARGET VALUES 
@@ -143,23 +71,21 @@ def knn_workclass_train(feature_columns,target_column):
     y = le_y.fit_transform(y)
 
     #################################################################################################
-    #split the data into training and testing 
+    # Split the data into training and testing 
     X_train, X_test, y_train, y_test = train_test_split(X_encoded_df, y, test_size=0.1, random_state=42)   
 
-    #train the KNN model 
-    knn = KNeighborsClassifier(n_neighbors=100)
+    # Train the KNN model 
+    knn = KNeighborsClassifier(n_neighbors=10)
     knn.fit(X_train, y_train)  # Fit the model to the training data
 
-
-    #evaluate the model 
+    # Evaluate the model 
     y_test_pred = knn.predict(X_test)
-    acc_score=accuracy_score(y_test, y_test_pred)
-    print(f"Accuracy: {acc_score}")
-    
-    return knn  # Just return the trained model
+    acc_score = accuracy_score(y_test, y_test_pred)
+    print(f"Model training complete. Accuracy on test set: {acc_score}")
 
-def prediction_function(knn, target_column, feature_columns=['age','education','educational-num', 'race', 'gender', 'hours-per-week', 'income']):
-    # Try to read the running updated file, if it doesn't exist, use the original problematic rows
+    #################################################################################################
+
+    # PREDICT MISSING DATA
     try:
         updated_data = pd.read_csv('problematic_rows_running_updates.csv')
     except FileNotFoundError:
@@ -167,155 +93,97 @@ def prediction_function(knn, target_column, feature_columns=['age','education','
     
     # Create X for the problematic rows
     X = updated_data[feature_columns].copy()
-    
+
     # Label encode gender and income
-    label_cols = ['gender', 'income']
     for column in label_cols:
         le_x = LabelEncoder()
         X[column] = le_x.fit_transform(X[column])
 
     # Scale numerical columns
-    numerical_cols = ['age', 'educational-num', 'hours-per-week']
-    scaler = StandardScaler()
-    X[numerical_cols] = scaler.fit_transform(X[numerical_cols])
+    X[numerical_cols] = scaler.transform(X[numerical_cols])
 
     # One-hot encode education and race
-    onehot_cols = ['race']
-    ct = ColumnTransformer([('onehot', OneHotEncoder(drop='first', sparse_output=False), onehot_cols)], remainder='passthrough')
-    
-    # Transform the data and create new dataframe with proper column names
-    X_encoded = ct.fit_transform(X)
-    
-    # Get the new column names after one-hot encoding
-    onehot_feature_names = ct.named_transformers_['onehot'].get_feature_names_out(onehot_cols)
-    # Get the names of the columns that weren't transformed
-    passthrough_cols = [col for col in X.columns if col not in onehot_cols]
-    # Combine all column names
-    new_column_names = list(onehot_feature_names) + passthrough_cols
+    X_encoded = ct.transform(X)
     
     # Convert to DataFrame with proper column names
-    X = pd.DataFrame(X_encoded, columns=new_column_names)
+    X_encoded_df = pd.DataFrame(X_encoded, columns=new_column_names)
     
-    # Get the target column from the model
-    target = target_column
-    
-    print(f"\nProcessing {target}...")
-    
-    # Create label encoder for target column and fit it on the clean data
-    clean_data = pd.read_csv('clean_data.csv')
+    # Label encode the target column for prediction
     target_encoder = LabelEncoder()
-    target_encoder.fit(clean_data[target])
+    target_encoder.fit(clean_data[target_column])
     
-    # Use the passed model directly
-    mask = (updated_data[target] == '?') | (updated_data[target] == 99999)
-
+    mask = (updated_data[target_column] == '?') | (updated_data[target_column] == 99999)
+    
     if mask.any():
-        # Make predictions for rows with '?' or 99999
-        predictions = knn.predict(X[mask])
-        # Convert numeric predictions back to text labels (if needed)
+        predictions = knn.predict(X_encoded_df[mask])
         text_predictions = target_encoder.inverse_transform(predictions)
-        updated_data.loc[mask, target] = text_predictions
+        updated_data.loc[mask, target_column] = text_predictions
 
-    print(f"Number of '?' or '99999' remaining in {target}: {((updated_data[target] == '?') | (updated_data[target] == 99999)).sum()}")
+    print(f"Number of '?' or '99999' remaining in '{target_column}': {((updated_data[target_column] == '?') | (updated_data[target_column] == 99999)).sum()}")
 
-    print(updated_data[target].head())
-
-    # Save the running updated dataset
+    # Save the updated data
     updated_data.to_csv('problematic_rows_running_updates.csv', index=False)
-    print(f"\nUpdated data saved to 'problematic_rows_running_updates.csv'")
+    print(f"Updated data saved to 'problematic_rows_running_updates.csv'")
+    
+    return knn  # Return the trained model for potential further use
+
+def compare_imputedknn_vs_knn():
+        
+        imputed_data = pd.read_csv('imputed_dataset.csv')
+        final_data = pd.read_csv('problematic_rows_running_updates.csv')
+
+        # Columns to compare
+        columns_to_compare = ['workclass', 'occupation', 'native-country']
 
 
-#column numbers from cleaned dataset
-"""
-0=age
-1=workclass
-2=fnlwgt
-3=education 
-4=education-num
-5=marital-status
-6=occupation
-7=relationship
-8=race
-9=gender
-10=capital-gain
-11=capital-loss
-12=hours-per-week
-13=native_country
-14=income 
-"""
+
+
+        # Calculate similarities
+        for column in columns_to_compare:
+            matches = (final_data[column] == imputed_data.loc[final_data.index, column]).sum()
+            total = len(final_data)
+            similarity = (matches / total) * 100
+            
+            print(f"\nSimilarity for {column}:")
+            print(f"Matching values: {matches} out of {total}")
+            print(f"Similarity percentage: {similarity:.2f}%")
+
+        # Overall similarity
+        total_matches = sum(final_data[col] == imputed_data.loc[final_data.index, col] for col in columns_to_compare).sum()
+        total_values = len(final_data) * len(columns_to_compare)
+        overall_similarity = (total_matches / total_values) * 100
+
+        print(f"\nOverall similarity across all columns: {overall_similarity:.2f}%")
+
+        # After your existing commented comparison code, add:
+        # Merge clean and problematic data
+        print("\nMerging clean and imputed datasets...")
+        clean_data = pd.read_csv('clean_data.csv')
+        problematic_data = pd.read_csv('problematic_rows_running_updates.csv')
+
+
+
 
 # Define specific feature sets for each target
 workclass_features = ['age', 'educational-num', 'race', 'gender', 'hours-per-week', 'income']
 occupation_features = ['age', 'educational-num', 'race', 'gender', 'hours-per-week', 'income']
 native_country_features = ['age', 'educational-num', 'race', 'gender', 'hours-per-week', 'income']
 capital_gain_features = ['age', 'educational-num', 'race', 'gender', 'hours-per-week', 'income']
-capital_loss_features = ['age', 'educational-num', 'race', 'gender', 'hours-per-week', 'income']
 
 # Step 1: load the adult dataset, find all the ? and 99999 and replace them with nan 
 cleaned_data_function(file_path = 'adult.csv')
 
 
-# Train and predict for workclass
-#knn_workclass = knn_workclass_train(feature_columns=workclass_features,target_column='workclass')
-#prediction_function(knn_workclass, target_column='workclass', feature_columns=workclass_features)
 
+target_predicitons=["workclass","occupation","native-country","capital-gain"]
+for class_predict in target_predicitons:
+    knn_workclass_train_predict(workclass_features,class_predict)
 
+compare_imputedknn_vs_knn()
+#
 
-
-# Train and predict for occupation
-#knn_occupation = knn_workclass_train(feature_columns=occupation_features,target_column='occupation')
-#prediction_function(knn_occupation,  feature_columns=occupation_features,target_column='occupation')
-
-
-
-# Train and predict for native-country
-#knn_native = knn_workclass_train(feature_columns=native_country_features,target_column='native-country')
-#prediction_function(knn_native, target_column='native-country', feature_columns=native_country_features)
-
-##used to select hte best paramters for every model change the target 
-#fine_tuning(feature_columns=workclass_features,target_column='native-country')
-
-knn_capital_loss = knn_workclass_train(feature_columns=capital_loss_features,target_column='capital-loss')
-prediction_function(knn_capital_loss, target_column='capital-loss', feature_columns=capital_loss_features)
-
-
-knn_capital_gain = knn_workclass_train(feature_columns=capital_gain_features,target_column='capital-gain')
-prediction_function(knn_capital_gain, target_column='capital-gain', feature_columns=capital_gain_features)
 
 """
-# Load both CSV files and compare results
-imputed_data = pd.read_csv('imputed_dataset.csv')
-final_data = pd.read_csv('problematic_rows_running_updates.csv')
-
-# Columns to compare
-columns_to_compare = ['workclass', 'occupation', 'native-country']
-
-
-
-
-# Calculate similarities
-for column in columns_to_compare:
-    matches = (final_data[column] == imputed_data.loc[final_data.index, column]).sum()
-    total = len(final_data)
-    similarity = (matches / total) * 100
-    
-    print(f"\nSimilarity for {column}:")
-    print(f"Matching values: {matches} out of {total}")
-    print(f"Similarity percentage: {similarity:.2f}%")
-
-# Overall similarity
-total_matches = sum(final_data[col] == imputed_data.loc[final_data.index, col] for col in columns_to_compare).sum()
-total_values = len(final_data) * len(columns_to_compare)
-overall_similarity = (total_matches / total_values) * 100
-
-print(f"\nOverall similarity across all columns: {overall_similarity:.2f}%")
-
-# After your existing commented comparison code, add:
-# Merge clean and problematic data
-print("\nMerging clean and imputed datasets...")
-clean_data = pd.read_csv('clean_data.csv')
-problematic_data = pd.read_csv('problematic_rows_running_updates.csv')
-
 # Combine the datasets
 complete_dataset = pd.concat([clean_data, problematic_data], axis=0, ignore_index=True)
 

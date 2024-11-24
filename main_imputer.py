@@ -1,74 +1,39 @@
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import LabelEncoder
-from sklearn.impute import KNNImputer
+from sklearn.neighbors import KNeighborsClassifier
 
-data = pd.read_csv('adult.csv')
+# Load the dataset
+df = pd.read_csv('adult.csv')
 
-# Replace both '?' and 99999 with np.nan
-data = data.replace(["?", 99999], np.nan, inplace=True)
+# Replace missing values with NaN
+df.replace({'?': np.nan, 99999: np.nan}, inplace=True)
 
-# Discuss why 5 was chosen
-# hyperpapremet testing
+# Define columns
+feature_cols = ['age', 'educational-num', 'race', 'gender', 'hours-per-week', 'income']
+target_cols = ['workclass', 'occupation', 'native-country']
 
-def impute_column(data, target_col, feature_cols, n_neighbors=5):
-    print(f"\nImputing {target_col}")
-    print(feature_cols)
-    print(f"Missing values before imputation: {data[target_col].isnull().sum()}")
+# Create dummy variables for categorical features
+X = pd.get_dummies(df[feature_cols], columns=['race', 'gender', 'income'])
+
+# Impute each target column
+for target_col in target_cols:
+    print(f"\nProcessing {target_col}...")
     
-    # Create features for KNN imputation
-    features_for_imputation = data[feature_cols].copy()
+    # Split into rows with and without missing values
+    train_mask = df[target_col].notna()
+    missing_mask = df[target_col].isna()
     
-    # Encode all categorical columns in features
-    encoders = {}
-    for col in features_for_imputation.select_dtypes(include=['object']).columns:
-        le = LabelEncoder()
-        non_null_values = features_for_imputation[col].dropna()
-        le.fit(non_null_values)
-        features_for_imputation.loc[non_null_values.index, col] = le.transform(non_null_values)
-        encoders[col] = le
-    
-    # Encode target column
-    target_le = LabelEncoder()
-    non_null_values = data[target_col].dropna()
-    target_le.fit(non_null_values)
-    target_numeric = pd.Series(index=data.index)
-    target_numeric[non_null_values.index] = target_le.transform(non_null_values)
-    features_for_imputation[target_col] = target_numeric
-    
-    # Initialize and apply KNNImputer
-    imputer = KNNImputer(n_neighbors=n_neighbors)
-    imputed_values = imputer.fit_transform(features_for_imputation)
-    
-    # Extract imputed values and convert back to original categories
-    imputed_target = pd.Series(imputed_values[:, -1])
-    data[target_col] = target_le.inverse_transform(imputed_target.astype(int))
-    
-    print(f"Missing values after imputation: {data[target_col].isnull().sum()}")
-    return data
+    if missing_mask.any():
+        # Train KNN classifier
+        knn = KNeighborsClassifier(n_neighbors=5)
+        knn.fit(X[train_mask], df[target_col][train_mask])
+        
+        # Predict missing values
+        predictions = knn.predict(X[missing_mask])
+        df.loc[missing_mask, target_col] = predictions
+        
+        print(f"Imputed {missing_mask.sum()} missing values in {target_col}")
 
-
-# Impute workclass using more demographic and education features
-data = impute_column(data, 
-                    'workclass', 
-                    ['age', 'educational-num', 'education',  'relationship', 'race', 'gender','income'])
-
-# Impute occupation using work-related and demographic features
-data = impute_column(data, 
-                    'occupation', 
-                    ['age',  'educational-num', 'education', 'workclass', 'marital-status', 'relationship', 'race', 'gender','income'])
-
-# Impute native-country using demographic and socioeconomic features
-data = impute_column(data, 
-                    'native-country', 
-                    ['age', 'educational-num', 'education', 'workclass', 'occupation', 'race', 'gender','income'])
-
-# Impute capital-gain using work and demographic features
-data = impute_column(data, 
-                    'capital-gain', 
-                    ['age', 'educational-num', 'education', 'workclass', 'occupation', 'marital-status', 'relationship', 'race', 'gender','income' ])
-
-# Save the results
-data.to_csv('imputed_dataset.csv', index=False)
-print("\nFirst few rows of final imputed data:")
-print(data[['age', 'workclass', 'occupation', 'native-country', 'capital-gain']].head())
+# Save results
+df.to_csv('imputed_dataset.csv', index=False)
+print("\nImputation complete. Results saved to 'imputed_dataset.csv'")
