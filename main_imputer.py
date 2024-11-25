@@ -35,11 +35,13 @@ def adult_imputer(target_cols,k,data):
         
         # Label encode the target column first
         target_data = data[target_col].copy()
-
+        print(target_data)
         target_encoded = le.fit_transform(target_data[target_data.notna()]) # Encode non-null values
         target_data[target_data.notna()] = target_encoded
-        
+        print(target_data)
         data_with_target = data_impute.append(target_data, ignore_index=True)
+        print(data_with_target)
+        print("hello")
 
         
         # Apply KNN imputation
