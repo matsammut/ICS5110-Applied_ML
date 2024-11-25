@@ -4,11 +4,10 @@ import seaborn as sns
 import numpy as np
 print(plt.style.available)
 # Load the dataset
-file_path = 'complete_dataset.csv'
+file_path = 'imputed_dataset.csv'
 data = pd.read_csv(file_path)
 
 # Plot settings
-plt.style.use('seaborn-v0_8-darkgrid')
 plt.rcParams['figure.figsize'] = (20, 10)
 
 # Separate numerical and categorical columns
