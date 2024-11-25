@@ -11,7 +11,7 @@ df.replace({'?': np.nan, 99999: np.nan}, inplace=True)
 
 # Define columns
 feature_cols = ['age', 'educational-num', 'race', 'gender', 'hours-per-week', 'income']
-target_cols = ['workclass', 'occupation', 'native-country']
+target_cols = ['workclass', 'occupation', 'native-country','capital-gain']
 
 # Prepare features
 X = df[feature_cols].copy()
