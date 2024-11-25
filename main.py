@@ -24,7 +24,7 @@ def cleaned_data_function(file_path):
     clean_data.to_csv('clean_data.csv', index=False)#
     return problematic_rows
     
-def knn_workclass_train_predict(feature_columns, target_column):
+def knn_train_predict(feature_columns, target_column):
     """
     Trains a KNN model on the clean dataset and uses it to predict missing values for the 'workclass' column.
     """
@@ -173,12 +173,12 @@ capital_gain_features = ['age', 'educational-num', 'race', 'gender', 'hours-per-
 # Step 1: load the adult dataset, find all the ? and 99999 and replace them with nan 
 cleaned_data_function(file_path = 'adult.csv')
 
-
+  
 
 target_predicitons=["workclass","occupation","native-country","capital-gain"]
 for class_predict in target_predicitons:
-    knn_workclass_train_predict(workclass_features,class_predict)
-
+   knn_train_predict(workclass_features,class_predict)
+    
 compare_imputedknn_vs_knn()
 #
 

@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.impute import KNNImputer
 
 # Load the dataset
 df = pd.read_csv('adult.csv')
@@ -12,28 +13,51 @@ df.replace({'?': np.nan, 99999: np.nan}, inplace=True)
 feature_cols = ['age', 'educational-num', 'race', 'gender', 'hours-per-week', 'income']
 target_cols = ['workclass', 'occupation', 'native-country']
 
-# Create dummy variables for categorical features
-X = pd.get_dummies(df[feature_cols], columns=['race', 'gender', 'income'])
+# Prepare features
+X = df[feature_cols].copy()
+
+# 1. Scale numerical features
+scaler = StandardScaler()
+numeric_cols = ['age', 'educational-num', 'hours-per-week']
+X[numeric_cols] = scaler.fit_transform(X[numeric_cols])
+
+# 2. Label encode gender and income
+le = LabelEncoder()
+X['gender'] = le.fit_transform(X['gender'])
+X['income'] = le.fit_transform(X['income'])
+
+# 3. One-hot encode race
+race_encoded = pd.get_dummies(X['race'], prefix='race')
+X = pd.concat([X.drop('race', axis=1), race_encoded], axis=1)
 
 # Impute each target column
 for target_col in target_cols:
     print(f"\nProcessing {target_col}...")
     
-    # Split into rows with and without missing values
-    train_mask = df[target_col].notna()
-    missing_mask = df[target_col].isna()
+    # Label encode the target column first
+    target_data = df[target_col].copy()
+    le = LabelEncoder()
+    target_encoded = le.fit_transform(target_data[target_data.notna()]) # Encode non-null values
+    target_data[target_data.notna()] = target_encoded
     
-    if missing_mask.any():
-        # Train KNN classifier
-        knn = KNeighborsClassifier(n_neighbors=5)
-        knn.fit(X[train_mask], df[target_col][train_mask])
-        
-        # Predict missing values
-        predictions = knn.predict(X[missing_mask])
-        df.loc[missing_mask, target_col] = predictions
-        
-        print(f"Imputed {missing_mask.sum()} missing values in {target_col}")
+    # Prepare data for imputation
+    data_for_imputation = pd.concat([X, target_data], axis=1)
+    
+    # Apply KNN imputation
+    imputer = KNNImputer(n_neighbors=5)
+    imputed_values = imputer.fit_transform(data_for_imputation)
+    
+    
+    # Round the imputed values to nearest integer before inverse transform
+    imputed_target = le.inverse_transform(np.round(imputed_values[:, -1]).astype(int))
+    
+    # Update the original dataframe
+    df[target_col] = imputed_target
+    
+    print(f"Imputed missing values in {target_col}")
 
 # Save results
 df.to_csv('imputed_dataset.csv', index=False)
 print("\nImputation complete. Results saved to 'imputed_dataset.csv'")
+
+
