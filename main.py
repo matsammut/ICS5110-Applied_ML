@@ -49,10 +49,7 @@ def knn_train_predict(feature_columns, target_column):
 
     # One-hot encode education and race
     onehot_cols = ['race']
-    ct = ColumnTransformer([
-        ('onehot', OneHotEncoder(drop='first', sparse_output=False), onehot_cols)
-    ], remainder='passthrough')
-    
+    ct = ColumnTransformer([('onehot', OneHotEncoder(drop='first', sparse_output=False), onehot_cols)], remainder='passthrough')
     X_encoded = ct.fit_transform(X)
     
     # Label encode the target
@@ -60,7 +57,7 @@ def knn_train_predict(feature_columns, target_column):
     y = le_y.fit_transform(y)
 
     # Split and train
-    X_train, X_test, y_train, y_test = train_test_split(X_encoded, y, test_size=0.1, random_state=42)   
+    X_train, X_test, y_train, y_test = train_test_split(X_encoded, y, test_size=0.2, random_state=42)   
     knn = KNeighborsClassifier(n_neighbors=10)
     knn.fit(X_train, y_train)
 
@@ -98,106 +95,6 @@ def knn_train_predict(feature_columns, target_column):
     print(f"Updated data saved to 'problematic_rows_running_updates.csv'")
     
     return knn
-def knn_workclass_label_encoding(feature_columns, target_column):
-    """
-    Trains a KNN model on the clean dataset and uses it to predict missing values for the 'workclass' column.
-    """
-    clean_data = pd.read_csv('clean_data.csv')
-    
-    # SPLIT THE FEATURES AND THE TARGET VALUES 
-    X = clean_data[feature_columns].copy()  
-    y = clean_data[target_column]
-
-    ###################################################################################################                                                     
-    column_names = X.columns
-    print(f"The columns to be used are {column_names}")
-
-    # Label encode gender and income
-    label_cols = ['gender', 'income','race']
-    for column in label_cols:
-        le_x = LabelEncoder()
-        X[column] = le_x.fit_transform(X[column])
-
-    # Scale numerical columns
-    numerical_cols = ['age', 'educational-num', 'hours-per-week']
-    scaler = MinMaxScaler(feature_range=(-1, 1))
-    X[numerical_cols] = scaler.fit_transform(X[numerical_cols])
-
-    # Remove the one-hot encoding related code and directly use X
-    X_encoded_df = X
-    
-    # Label encode the target
-    le_y = LabelEncoder()
-    y = le_y.fit_transform(y)
-
-    #################################################################################################
-    # Split the data into training and testing 
-    X_train, X_test, y_train, y_test = train_test_split(X_encoded_df, y, test_size=0.1, random_state=42)   
-
-    # Train the KNN model 
-    knn = KNeighborsClassifier(n_neighbors=10)
-    knn.fit(X_train, y_train)  # Fit the model to the training data
-
-    # Evaluate the model 
-    y_test_pred = knn.predict(X_test)
-    acc_score = accuracy_score(y_test, y_test_pred)
-    print(f"Model training complete. Accuracy on test set: {acc_score}")
-def knn_workclass_onehot_encoding(feature_columns, target_column):
-    """
-    Trains a KNN model on the clean dataset and uses it to predict missing values for the 'workclass' column.
-    """
-    clean_data = pd.read_csv('clean_data.csv')
-    
-    # SPLIT THE FEATURES AND THE TARGET VALUES 
-    X = clean_data[feature_columns].copy()  
-    y = clean_data[target_column]
-
-    ###################################################################################################                                                     
-    column_names = X.columns
-    print(f"The columns to be used are {column_names}")
-
-    # Label encode gender and income
-    
-
-    # Scale numerical columns
-    numerical_cols = ['age', 'educational-num', 'hours-per-week']
-    scaler = MinMaxScaler(feature_range=(-1, 1))
-    X[numerical_cols] = scaler.fit_transform(X[numerical_cols])
-
-    # One-hot encode education and race
-    onehot_cols = ['race','gender', 'income']
-    ct = ColumnTransformer([('onehot', OneHotEncoder(drop='first', sparse_output=False), onehot_cols)], remainder='passthrough')
-    
-    # Transform the data and create new dataframe with proper column names
-    X_encoded = ct.fit_transform(X)
-    
-    # Get the new column names after one-hot encoding
-    onehot_feature_names = ct.named_transformers_['onehot'].get_feature_names_out(onehot_cols)
-    # Get the names of the columns that weren't transformed
-    passthrough_cols = [col for col in X.columns if col not in onehot_cols]
-    # Combine all column names
-    new_column_names = list(onehot_feature_names) + passthrough_cols
-    
-    # Convert to DataFrame with proper column names
-    X_encoded_df = pd.DataFrame(X_encoded, columns=new_column_names)
-    
-    # Label encode the target
-    le_y = LabelEncoder()
-    y = le_y.fit_transform(y)
-
-    #################################################################################################
-    # Split the data into training and testing 
-    X_train, X_test, y_train, y_test = train_test_split(X_encoded_df, y, test_size=0.1, random_state=42)   
-
-    # Train the KNN model 
-    knn = KNeighborsClassifier(n_neighbors=10)
-    knn.fit(X_train, y_train)  # Fit the model to the training data
-
-    # Evaluate the model 
-    y_test_pred = knn.predict(X_test)
-    acc_score = accuracy_score(y_test, y_test_pred)
-    print(f"Model training complete. Accuracy on test set: {acc_score}")
-
 
 def compare_imputedknn_vs_knn():
         
@@ -250,9 +147,8 @@ cleaned_data_function(file_path = 'adult.csv')
 target_predicitons=["workclass","occupation","native-country","capital-gain"]
 for class_predict in target_predicitons:
     knn_train_predict(workclass_features,class_predict)
-    #knn_workclass_label_encoding(workclass_features,class_predict)
-    #knn_workclass_onehot_encoding(workclass_features,class_predict)
-#compare_imputedknn_vs_knn()
+    
+compare_imputedknn_vs_knn()
 #
 
 
