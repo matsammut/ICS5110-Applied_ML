@@ -35,23 +35,21 @@ def adult_imputer(target_cols,k,data):
         
         # Label encode the target column first
         target_data = data[target_col].copy()
-        print(target_data)
         target_encoded = le.fit_transform(target_data[target_data.notna()]) # Encode non-null values
         target_data[target_data.notna()] = target_encoded
-        print(target_data)
-        data_with_target = data_impute.append(target_data, ignore_index=True)
-        print(data_with_target)
-        print("hello")
-
+        data_impute[target_col] = target_data
         
+
+        #change from label encoding to one hot for target as it doesnt make sense with catagories
         # Apply KNN imputation
         imputer = KNNImputer(n_neighbors=k)
-        data_with_target = imputer.fit_transform(data_with_target)
-        imputed_values = data_with_target[target_col]
-        
-        imputed_target = le.inverse_transform(np.round(imputed_values[:, -1]).astype(int))
+        data_with_target = pd.DataFrame(imputer.fit_transform(data_impute), columns=data_impute.columns)
+        imputed_values = data_with_target[target_col].values
+        #imputed_target = le.inverse_transform(np.round(imputed_values).astype(int))
+        #print(imputed_target)
+        #imputed_target.to_csv('imputed_dataset.csv', index=False)
         
         # Update the original dataframe
-        data[target_col] = imputed_target
+        data[target_col] = imputed_values
 
     data.to_csv('imputed_dataset.csv', index=False)

@@ -53,7 +53,7 @@ non_imputable = ['age', 'educational-num', 'race', 'gender', 'hours-per-week', '
 # imputable_columns=["workclass","occupation","capital-gain","capital-loss"]
 imputable_columns=["workclass"]
 numeric_cols = ['age', 'educational-num', 'hours-per-week']
-feature_selected_out = ['native-country','fnlwgt','education','marital-status','relationship']
+feature_selected_out = ['native-country','fnlwgt','education','marital-status','relationship','occupation']
 
 data = pd.read_csv('adult.csv')
 # print(data.head())
