@@ -8,7 +8,8 @@ def cleaning_features(data, numeric_cols,drop_columns):
     scaler = StandardScaler()
 
     data.replace({'?': np.nan, 99999: np.nan}, inplace=True)
-
+    #check which columns have missing values
+    
     # 1. Scale numerical features
     data[numeric_cols] = scaler.fit_transform(data[numeric_cols])
 
