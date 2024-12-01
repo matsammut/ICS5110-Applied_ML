@@ -47,8 +47,6 @@ def adult_imputer(target_cols,k,data):
         data_with_target = pd.DataFrame(imputer.fit_transform(data_impute), columns=data_impute.columns)
         imputed_values = data_with_target[target_col].values
         imputed_target = le.inverse_transform(np.round(imputed_values).astype(int))
-        #print(imputed_target)
-       # imputed_target.to_csv('imputed_dataset.csv', index=False)
         
         # Update the original dataframe
         data[target_col] = imputed_target
