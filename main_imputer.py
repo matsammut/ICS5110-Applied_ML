@@ -16,10 +16,12 @@ def cleaning_features(data, numeric_cols,drop_columns):
     # 2. Label encode gender and income
     data['gender'] = le.fit_transform(data['gender'])
     data['income'] = le.fit_transform(data['income'])
-
+    
     # 3. One-hot encode race
-    race_encoded = pd.get_dummies(data['race'], prefix='race')
+    race_encoded = pd.get_dummies(data['race'], prefix='race').astype(int)
     data = pd.concat([data.drop('race', axis=1), race_encoded], axis=1)
+
+    print(data.head(10))
 
     data = data.drop(columns=drop_columns, axis=1)
 

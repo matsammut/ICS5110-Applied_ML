@@ -107,7 +107,8 @@ data_knn=data.copy()
 
 
 imputer_data=imp.adult_imputer(imputable_columns,5,data)
-knn_claisifer_missing_data_inputed=train_knn(imputable_columns,10,data_knn)
 
-compare(knn_claisifer_missing_data_inputed,imputer_data,imputable_columns)
+#knn_claisifer_missing_data_inputed=train_knn(imputable_columns,10,data_knn)
+
+#compare(knn_claisifer_missing_data_inputed,imputer_data,imputable_columns)
 
