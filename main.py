@@ -1,23 +1,17 @@
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import LabelEncoder,  MinMaxScaler
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
-from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import OneHotEncoder
 import main_imputer as imp
 
 def train_knn(target_col, k, data):
     print("inside train_knn")
     le = LabelEncoder()
-    
-
-
-
-    #save nan values 
     missing_data = data[data.isna().any(axis=1)]
-    
     
     #from the missing data drop the target columns aswell
     Missing_data_2 = missing_data.drop(columns=target_col, axis=1)
@@ -29,15 +23,11 @@ def train_knn(target_col, k, data):
     #from the complete data drop the target columns aswell
     reduced_data = complete_data.drop(columns=target_col, axis=1)
     
-    
-    
-    
-    
     for n in target_col:
         x = reduced_data
         y = complete_data[n]
-        print(x.head(10))
-        print(y.head(10))
+       # print(x.head(10))
+       # print(y.head(10))
         y = le.fit_transform(y)
         
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.25, random_state=42)
@@ -83,15 +73,22 @@ def compare(knn_claisifer_missing_data_inputed, imputer_data, target_col):
         match_percentage = (matches / len(workclass_df1)) * 100
         print(f"Matching percentage:  for {match_percentage:.2f}%")
 
+def correlation_matrix(data):
+    correlation_matrix = data.corr(method='pearson')
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(correlation_matrix, annot=True, fmt=".2f", cmap='coolwarm', cbar=True)
+    plt.title('Correlation Matrix Heatmap of Adult Income Dataset')
+    plt.show()
+
 
 
 
 # Define specific feature sets for each target
 non_imputable = ['age', 'educational-num', 'race', 'gender', 'hours-per-week', 'income']
 # imputable_columns=["workclass","occupation","capital-gain","capital-loss"]
-imputable_columns=['workclass','occupation','capital-gain']
+imputable_columns=['workclass','occupation','capital-gain','native-country']
 numeric_cols = ['age', 'educational-num', 'hours-per-week']
-feature_selected_out = ['native-country','fnlwgt','education','marital-status','relationship']
+feature_selected_out = ['fnlwgt','education','marital-status','relationship']
 
 
 
@@ -100,15 +97,10 @@ data = pd.read_csv('adult.csv')
 
 #call the function the the file main_imputer to celan the data 
 data = imp.cleaning_features(data,numeric_cols,feature_selected_out)
-data_knn=data.copy()
-
-
-
-
-
+correlation_matrix(data)
 imputer_data=imp.adult_imputer(imputable_columns,5,data)
 
-#knn_claisifer_missing_data_inputed=train_knn(imputable_columns,10,data_knn)
+#knn_claisifer_missing_data_inputed=train_knn(imputable_columns,10,data)
 
 #compare(knn_claisifer_missing_data_inputed,imputer_data,imputable_columns)
 

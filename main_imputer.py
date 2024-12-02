@@ -20,6 +20,9 @@ def cleaning_features(data, numeric_cols,drop_columns):
     # 3. One-hot encode race
     race_encoded = pd.get_dummies(data['race'], prefix='race').astype(int)
     data = pd.concat([data.drop('race', axis=1), race_encoded], axis=1)
+    # Binarize native country
+    data['native-country'] = data['native-country'].apply(lambda x: x == 'United-States')
+    data['native-country'] = data['native-country'].astype(int)
 
     print(data.head(10))
 
@@ -48,10 +51,11 @@ def adult_imputer(target_cols,k,data):
         imputer = KNNImputer(n_neighbors=k)
         data_with_target = pd.DataFrame(imputer.fit_transform(data_impute), columns=data_impute.columns)
         imputed_values = data_with_target[target_col].values
-        imputed_target = le.inverse_transform(np.round(imputed_values).astype(int))
+        #imputed_target = le.inverse_transform(np.round(imputed_values).astype(int))
         
         # Update the original dataframe
-        data[target_col] = imputed_target
+        #data[target_col] = imputed_target
+        data[target_col] = imputed_values
 
     data.to_csv('imputed_dataset.csv', index=False)
     return data
