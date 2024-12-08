@@ -1,237 +1,175 @@
-##impor the libraries
-import pandas as pd
+import optuna
+import random
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import make_scorer, accuracy_score, precision_score, recall_score, f1_score
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, classification_report
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, precision_score, f1_score, recall_score
+from sklearn.preprocessing import LabelEncoder, StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler, QuantileTransformer
+import warnings
+import matplotlib.pyplot as plt
 
+warnings.filterwarnings("ignore")
 
-def prepare_dataset(data):
-    X = data.drop(columns=['income'])
-    y = data['income']
+# Set global random seeds for reproducibility
+SEED = 42
+random.seed(SEED)
+np.random.seed(SEED)
 
-    # Encode gender first
-    gender_encoder = LabelEncoder()
-    X['gender'] = gender_encoder.fit_transform(X['gender'])
+# Data Preprocessing Function
+def Rescaling_experiments(data, numeric_cols, columns_to_encode, scaling_method, encoding_type="onehot"):
+    # Apply scaling to numeric columns
+    if scaling_method == 0:  # No Scaling
+        pass
+    elif scaling_method == 1:  # MaxAbsScaler
+        data[numeric_cols] = MaxAbsScaler().fit_transform(data[numeric_cols])
+    elif scaling_method == 2:  # StandardScaler
+        data[numeric_cols] = StandardScaler().fit_transform(data[numeric_cols])
+    elif scaling_method == 3:  # MinMaxScaler
+        data[numeric_cols] = MinMaxScaler().fit_transform(data[numeric_cols])
+    elif scaling_method == 4:  # RobustScaler
+        data[numeric_cols] = RobustScaler().fit_transform(data[numeric_cols])
+    elif scaling_method == 5:  # QuantileTransformer (Uniform)
+        data[numeric_cols] = QuantileTransformer(output_distribution='uniform', random_state=SEED).fit_transform(data[numeric_cols])
+    elif scaling_method == 6:  # QuantileTransformer (Normal)
+        data[numeric_cols] = QuantileTransformer(output_distribution='normal', random_state=SEED).fit_transform(data[numeric_cols])
 
-    #perform one hot encoding on the categorical features
-    onehot_cols = ['workclass', 'education', 'marital-status', 'occupation', 'relationship', 'race', 'native-country']
-    ct = ColumnTransformer([('onehot', OneHotEncoder(drop='first', sparse_output=False), onehot_cols)], remainder='passthrough')
+    # Apply encoding to categorical columns
+    if encoding_type == "onehot":
+        data = pd.get_dummies(data, columns=columns_to_encode).astype(int)
 
-    X = np.array(ct.fit_transform(X))
+    return data
 
-    # Encode target variable
-    y_encoder = LabelEncoder()
-    encoded_y = y_encoder.fit_transform(y)
-
-    feature_names = ct.get_feature_names_out()
-
-    #split the data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X, encoded_y, test_size=0.1, random_state=42)
-    return X_train, X_test, y_train, y_test,feature_names,encoded_y
-
-    #function used to test the best parameters for the decision tree
-def Test_best_paramters(X_train, y_train):
-    print("Testing the best parameters")
-    param_grid = {
-    'max_depth': [3, 5, 7, 10, None],
-    'min_samples_split': [2, 5, 10],
-    'min_samples_leaf': [1, 2, 4],
-    'criterion': ['gini', 'entropy'],
-    'max_features': ['sqrt', 'log2', None]
+# Objective Function for Optuna
+def objective(trial):
+    params = {
+        'criterion': trial.suggest_categorical('criterion', ['gini', 'entropy','log_loss']),
+        'splitter': trial.suggest_categorical('splitter', ['best', 'random']),
+        'max_depth': trial.suggest_int('max_depth', 3, 100),
+        'min_samples_split': trial.suggest_int('min_samples_split', 3, 100),
+        'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 50),
+        'max_features': trial.suggest_categorical('max_features', [None, 'sqrt', 'log2']),
+        'ccp_alpha': trial.suggest_float('ccp_alpha', 0.0, 0.1, step=0.01),
+        'class_weight': trial.suggest_categorical('class_weight', [None, 'balanced']),
     }
 
-    # Create scoring metrics
-    scoring = {
-        'accuracy': make_scorer(accuracy_score),
-        'precision': make_scorer(precision_score, average='weighted'),
-        'recall': make_scorer(recall_score, average='weighted'),
-        'f1': make_scorer(f1_score, average='weighted')
-    }
-
-    # Initialize GridSearchCV
-    grid_search = GridSearchCV(
-        estimator=DecisionTreeClassifier(random_state=42),
-        param_grid=param_grid,
-        cv=5,  # 5-fold cross-validation
-        scoring=scoring,
-        refit='accuracy',  # Use accuracy to select the best model
-        n_jobs=-1,  # Use all available cores
-        verbose=2
-)
-
-    # Fit the grid search
-    grid_search.fit(X_train, y_train)
-    # Print the best parameters and score
-    print("\nBest parameters:", grid_search.best_params_)
-    print("Best cross-validation accuracy: {:.3f}".format(grid_search.best_score_))
-
-    # Get the best model
-    best_model = grid_search.best_estimator_
+    # Train Decision Tree with these parameters
+    clf = DecisionTreeClassifier(random_state=SEED, **params)
+    clf.fit(X_train, y_train)
     
-    # Add this line to return the best model
-    return best_model  # <-- Add this line
-def train_decision_tree(X_train, y_train):
-    # Evaluate on test set
-    best_model = DecisionTreeClassifier(
-        criterion='gini',
-        max_depth=10,
-        max_features=None,
-        min_samples_leaf=2,
-        min_samples_split=10,
-        random_state=42
-    )
-    best_model.fit(X_train, y_train)
-    return best_model
-def predict_model_decision_tree(model, X_test, y_test, y_encoder):
-    y_pred = model.predict(X_test)
+    # Predict and evaluate
+    y_pred = clf.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
-    print("\nTest set accuracy with best model: {:.3f}".format(accuracy))
-
-    # Create and plot confusion matrix for the best model
-    cm = confusion_matrix(y_test, y_pred)
-    disp = ConfusionMatrixDisplay(confusion_matrix=cm, 
-                                display_labels=y_encoder.classes_)
-    disp.plot(cmap='Blues')
-    plt.title('Confusion Matrix (Best Model)')
-    plt.show()
-
-    # Print detailed classification report
-    print("\nClassification Report:")
-    print(classification_report(y_test, y_pred, target_names=y_encoder.classes_))
-
-
-def train_random_forest_tree(X_train, y_train):
-    rf_model = RandomForestClassifier(
-        n_estimators=200,
-        max_depth=20,
-        min_samples_split=5,
-        min_samples_leaf=2,
-    )
-    rf_model.fit(X_train, y_train)
-    return rf_model
-def predict_random_forest_tree(model, X_test, y_test):
-    y_pred = model.predict(X_test)
-    accuracy = accuracy_score(y_test, y_pred)
-    print("\nTest set accuracy with best model: {:.3f}".format(accuracy))
-def fine_tune_decision_tree(X_train, y_train):
-    print("Starting Decision Tree fine-tuning...")
     
-    param_grid = {
-        'max_depth': [3, 5, 7, 10, 15, 20, None],
-        'min_samples_split': [2, 5, 10, 15, 20],
-        'min_samples_leaf': [1, 2, 4, 6, 8],
-        'criterion': ['gini', 'entropy', 'log_loss'],
-        'max_features': ['sqrt', 'log2', None],
-        'class_weight': ['balanced', None],
-        'splitter': ['best', 'random']
-    }
+    return accuracy
 
-    scoring = {
-        'accuracy': make_scorer(accuracy_score),
-        'precision': make_scorer(precision_score, average='weighted'),
-        'recall': make_scorer(recall_score, average='weighted'),
-        'f1': make_scorer(f1_score, average='weighted')
-    }
+# Load Dataset
+data = pd.read_csv('imputed_dataset_2.csv')
 
-    grid_search = GridSearchCV(
-        estimator=DecisionTreeClassifier(random_state=42),
-        param_grid=param_grid,
-        cv=5,
-        scoring=scoring,
-        refit='accuracy',
-        n_jobs=-1,
-        verbose=1
-    )
+# Configuration
+columns_to_encode = ['workclass', 'occupation']
+numeric_cols = ['age', 'educational-num', 'hours-per-week']
 
-    print("Fitting GridSearchCV... This might take a while...")
-    grid_search.fit(X_train, y_train)
+# Loop over different scaling methods
+scaling_methods = {
+    0: "No Scaling",
+    1: "MaxAbsScaler",
+    2: "StandardScaler",
+    3: "MinMaxScaler",
+    4: "RobustScaler",
+    5: "QuantileTransformer (Uniform)",
+    6: "QuantileTransformer (Normal)"
+}
+"""
+all_results = []
+for Trial in range(100, 200, 100):
+    for scaling_method in scaling_methods:
+        print(f"Testing Scaling Method: {scaling_methods[scaling_method]}")
+        
+        # Preprocess data
+        processed_data = Rescaling_experiments(data.copy(), numeric_cols, columns_to_encode, scaling_method, encoding_type="onehot")
+        print(processed_data.columns)
+        x = processed_data.drop(columns=['income'])
+        y = processed_data['income']
 
-    print("\nBest parameters found:", grid_search.best_params_)
-    print(f"Best cross-validation accuracy: {grid_search.best_score_:.3f}")
+        # Train-test split
+        X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=SEED)
 
-    return grid_search.best_estimator_
-def analyze_feature_importance(model, feature_names=None):
-    print(feature_names)
-    feature_importance = pd.DataFrame({
-        'feature': feature_names if feature_names is not None else range(len(model.feature_importances_)),
-        'importance': model.feature_importances_
-    })
-    feature_importance['importance'] = feature_importance['importance'].round(2)  # Round to two decimal places
-    feature_importance = feature_importance.sort_values('importance', ascending=False)
-    
-    plt.figure(figsize=(10, 6))
-    sns.barplot(data=feature_importance.head(10), x='importance', y='feature')
-    plt.title('Top 10 Most Important Features')
-    plt.xlabel('Importance (rounded to 2 decimal places)')  # Update x-axis label
-    plt.ylabel('Features')  # Update y-axis label
-    plt.show()
+        # Run Optuna
+        study = optuna.create_study(direction="maximize", sampler=optuna.samplers.TPESampler(seed=SEED))
+        study.optimize(objective, n_trials=Trial, n_jobs=1, show_progress_bar=True)
 
-def fine_tune_random_forest(X_train, y_train):
-    print("Starting Random Forest fine-tuning...")
-    
-    # Define parameter grid for Random Forest
-    param_grid = {
-        'n_estimators': [100, 200, 300],  # number of trees
-        'max_depth': [10, 20, 30, None],
-        'min_samples_split': [2, 5, 10],
-        'min_samples_leaf': [1, 2, 4],
-        'max_features': ['sqrt', 'log2', None],
-        'bootstrap': [True, False],
-        'class_weight': ['balanced', 'balanced_subsample', None]
-    }
+        # Best model
+        best_params = study.best_params
+        best_model = DecisionTreeClassifier(random_state=SEED, **best_params)
+        best_model.fit(X_train, y_train)
 
-    scoring = {
-        'accuracy': make_scorer(accuracy_score),
-        'precision': make_scorer(precision_score, average='weighted'),
-        'recall': make_scorer(recall_score, average='weighted'),
-        'f1': make_scorer(f1_score, average='weighted')
-    }
+        # Evaluate model
+        y_pred = best_model.predict(X_test)
+        accuracy = accuracy_score(y_test, y_pred)
+        precision = precision_score(y_test, y_pred, average="weighted")
+        f1 = f1_score(y_test, y_pred, average="weighted")
+        recall = recall_score(y_test, y_pred, average="weighted")
 
-    grid_search = GridSearchCV(
-        estimator=RandomForestClassifier(random_state=42),
-        param_grid=param_grid,
-        cv=5,
-        scoring=scoring,
-        refit='accuracy',
-        n_jobs=-1,
-        verbose=1
-    )
+        print(f"Best Params: {best_params}")
+        print(f"Results - Accuracy: {accuracy:.4f}, Precision: {precision:.4f}, F1: {f1:.4f}, Recall: {recall:.4f}")
 
-    print("Fitting GridSearchCV... This might take a while...")
-    grid_search.fit(X_train, y_train)
+        # Store results
+        all_results.append({
+            'Trial no': Trial,
+            'Scaling_Method': scaling_methods[scaling_method],
+            'Accuracy': accuracy,
+            'Precision': precision,
+            'F1': f1,
+            'Recall': recall
+        })
 
-    print("\nBest parameters found:", grid_search.best_params_)
-    print(f"Best cross-validation accuracy: {grid_search.best_score_:.3f}")
+# Convert results to DataFrame
+results_df = pd.DataFrame(all_results)
+print("\nFinal Results Summary:")
+results_df.to_csv('graphs/final_run_4.csv', index=False)
+print(results_df)
 
-    return grid_search.best_estimator_
+"""
 
-#load the dataset
-file_path = 'complete_dataset.csv'
-data = pd.read_csv(file_path)
+file_paths = [
+    'graphs/final_run_1.csv',
+   
+]
 
-X_train,X_test,y_train,y_test,feature_names,encoded_y = prepare_dataset(data)
-#split the features and target
+# Metrics to plot
+metrics = ['Accuracy', 'Precision', 'F1', 'Recall']
 
+# Create a subplot for each metric
+fig, axes = plt.subplots(len(metrics), 1, figsize=(12, 18), sharex=True)
 
+for file_path in file_paths:
+    # Load the CSV file
+    df = pd.read_csv(file_path)
 
+    for ax, metric in zip(axes, metrics):
+        for trial_no in df['Trial no'].unique():
+            subset = df[df['Trial no'] == trial_no]
+            ax.plot(subset['Scaling_Method'], subset[metric], label=f'Trial {trial_no} ({file_path})', marker='o')
+        
+        # Find the best rescaling method for the current metric
+        best_index = df[metric].idxmax()
+        best_scaling_method = df.loc[best_index, 'Scaling_Method']
+        best_value = df.loc[best_index, metric]
 
-#best_model = Test_best_paramters(X_train, y_train)
-Trained_decision_tree = train_decision_tree(X_train, y_train)
-predict_model_decision_tree(Trained_decision_tree, X_test, y_test, encoded_y)
+        # Annotate the best method on the plot
+        ax.annotate(f'Best: {best_scaling_method}\n{metric}: {best_value:.4f}',
+                    xy=(best_index, best_value), 
+                    xytext=(best_index, best_value + 0.02),  # Adjust the y-offset as needed
+                    arrowprops=dict(facecolor='black', arrowstyle='->'),
+                    fontsize=10, color='red')
 
-#best_estimator_random_forest = fine_tune_random_forest(X_train, y_train)
-#Trained_random_forest_tree = train_random_forest_tree(X_train, y_train)
-#analyze_feature_importance(model=Trained_random_forest_tree, feature_names=feature_names)
-#predict_random_forest_tree(Trained_random_forest_tree, X_test, y_test)
+        ax.set_title(f'{metric} Comparison Across Scaling Methods')
+        ax.set_xlabel('Scaling Method')
+        ax.set_ylabel(metric)
+        ax.legend(title="Trial Number")
+        ax.grid(visible=True)
+        ax.tick_params(axis='x', rotation=45)
 
-
-
+plt.tight_layout()
+plt.show()
