@@ -128,5 +128,5 @@ data_knn=data.copy()
 #imputer_data=imp.adult_imputer(imputable_columns,5,data)
 
 #USED ONLY FOR DECISION TREE CONNMENT BELOW 
-#imputer_data=imp.adult_imputer_dt(imputable_columns,10,data,scaler)
-knn_claisifer_missing_data_inputed=train_knn(imputable_columns_knn_clasifier,10,data_knn,scaler)
+imputer_data=imp.adult_imputer_dt(imputable_columns,10,data,scaler)
+#knn_claisifer_missing_data_inputed=train_knn(imputable_columns_knn_clasifier,10,data_knn,scaler)
