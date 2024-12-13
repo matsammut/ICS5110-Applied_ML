@@ -18,13 +18,14 @@ def cleaning_features(data, numeric_cols,drop_columns):
     data['gender'] = le.fit_transform(data['gender'])
     data['income'] = le.fit_transform(data['income'])
     
+    columns_to_encode = ['race','marital-status','relationship']
     # 3. One-hot encode race
-    
-    race_encoded = encoder.fit_transform(data[['race']])
-    race_encoded_cols = encoder.get_feature_names_out(['race'])
-    race_encoded_df = pd.DataFrame(race_encoded, columns=race_encoded_cols, index=data.index)
-    # Combine the encoded data with original dataframe
-    data = pd.concat([data.drop('race', axis=1), race_encoded_df], axis=1)
+    for N in columns_to_encode:
+        race_encoded = encoder.fit_transform(data[[N]])
+        race_encoded_cols = encoder.get_feature_names_out([N])
+        race_encoded_df = pd.DataFrame(race_encoded, columns=race_encoded_cols, index=data.index)
+        # Combine the encoded data with original dataframe
+        data = pd.concat([data.drop(N, axis=1), race_encoded_df], axis=1)
     # Binarize native country
     data['native-country'] = data['native-country'].apply(lambda x: x == 'United-States')
     data['native-country'] = data['native-country'].astype(int)
@@ -114,5 +115,33 @@ def adult_imputer_dt(target_cols, k, data,scaler_2):
             print(data.isna().sum())
 
     data[['age', 'educational-num', 'hours-per-week']] = np.round(scaler_2.inverse_transform(data[['age', 'educational-num', 'hours-per-week']]))    
-    data.to_csv('imputed_dataset_2.csv', index=False)
+    data.to_csv('Decision_tree_datasets/imputed_dataset_with_more_features.csv', index=False)
     return data
+
+
+
+def experments_dataset_prep(data,imputable_columns,scaler):
+    data.replace({'?': np.nan, 99999: np.nan}, inplace=True)
+    
+    data[['age', 'educational-num', 'hours-per-week']] = np.round(scaler.inverse_transform(data[['age', 'educational-num', 'hours-per-week']]))   
+    for col in imputable_columns:
+        if data[col].dtype == 'object':  # Categorical columns
+            # Use mode to fill missing values
+            data[col] = data[col].fillna(data[col].mode()[0])
+        else:  # Numerical columns
+            # Use mean to fill missing values
+            data[col] = data[col].fillna(data[col].mean())
+    print(data.isna().sum())
+    print(data.head(10))
+
+
+    data.to_csv('Decision_tree_datasets/imputed_dataset_withmean.csv', index=False)
+
+
+def drop_nan_values(data,scaler):
+    print(data.isna().sum())
+    data=data.dropna()
+    
+    data[['age', 'educational-num', 'hours-per-week']] = np.round(scaler.inverse_transform(data[['age', 'educational-num', 'hours-per-week']]))   
+    print(data.isna().sum())
+    data.to_csv('Decision_tree_datasets/orignal_data_droped_nan_values.csv', index=False)
