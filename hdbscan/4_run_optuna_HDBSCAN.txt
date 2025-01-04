@@ -1,0 +1,134 @@
+
+Distribution Statistics:
+
+age:
+Skewness: 0.558
+Kurtosis: -0.184
+
+capital-gain:
+Skewness: 5.866
+Kurtosis: 42.918
+
+capital-loss:
+Skewness: 4.570
+Kurtosis: 20.012
+
+hours-per-week:
+Skewness: 0.239
+Kurtosis: 2.951
+
+
+
+
+
+
+[I 2024-12-29 15:25:26,456] A new study created in memory with name: no-name-ced63d2c-1d23-4180-93b7-fc971c71a1ad
+[I 2024-12-29 15:25:54,425] Trial 0 finished with value: 0.14812451933776205 and parameters: {'min_cluster_size': 255, 'min_samples': 143, 'cluster_selection_epsilon': 0.805486348001117}. Best is trial 0 with value: 0.14812451933776205.
+[I 2024-12-29 15:26:21,417] Trial 1 finished with value: 0.16339469359898404 and parameters: {'min_cluster_size': 252, 'min_samples': 38, 'cluster_selection_epsilon': 0.6657447832899226}. Best is trial 1 with value: 0.16339469359898404.
+[I 2024-12-29 15:26:32,171] Trial 2 finished with value: 0.17366168231701815 and parameters: {'min_cluster_size': 65, 'min_samples': 62, 'cluster_selection_epsilon': 0.22833416869802148}. Best is trial 2 with value: 0.17366168231701815.
+[I 2024-12-29 15:26:36,091] Trial 3 finished with value: 0.16043073376805936 and parameters: {'min_cluster_size': 380, 'min_samples': 113, 'cluster_selection_epsilon': 0.7049965998873766}. Best is trial 2 with value: 0.17366168231701815.
+[I 2024-12-29 15:26:39,192] Trial 4 finished with value: 0.058898566567776284 and parameters: {'min_cluster_size': 191, 'min_samples': 149, 'cluster_selection_epsilon': 0.7104401073837664}. Best is trial 2 with value: 0.17366168231701815.
+[I 2024-12-29 15:26:42,726] Trial 5 finished with value: 0.021017911976746212 and parameters: {'min_cluster_size': 302, 'min_samples': 106, 'cluster_selection_epsilon': 0.7909643929913011}. Best is trial 2 with value: 0.17366168231701815.
+[I 2024-12-29 15:26:48,025] Trial 6 finished with value: 0.16187970182377348 and parameters: {'min_cluster_size': 281, 'min_samples': 280, 'cluster_selection_epsilon': 0.667795844158687}. Best is trial 2 with value: 0.17366168231701815.
+[I 2024-12-29 15:27:10,671] Trial 7 finished with value: 0.20781787319336698 and parameters: {'min_cluster_size': 226, 'min_samples': 65, 'cluster_selection_epsilon': 0.2564163040687192}. Best is trial 7 with value: 0.20781787319336698.
+[I 2024-12-29 15:27:37,639] Trial 8 finished with value: 0.24480007637936685 and parameters: {'min_cluster_size': 375, 'min_samples': 146, 'cluster_selection_epsilon': 0.07926679711663942}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:28:06,023] Trial 9 finished with value: 0.14600193486203583 and parameters: {'min_cluster_size': 244, 'min_samples': 156, 'cluster_selection_epsilon': 0.4375993327432518}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:28:10,437] Trial 10 finished with value: 0.11291298544555137 and parameters: {'min_cluster_size': 460, 'min_samples': 400, 'cluster_selection_epsilon': 0.006450721920841049}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:28:13,883] Trial 11 finished with value: 0.13837952823062524 and parameters: {'min_cluster_size': 382, 'min_samples': 215, 'cluster_selection_epsilon': 0.15258677684374916}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:28:39,991] Trial 12 finished with value: 0.16103539110675455 and parameters: {'min_cluster_size': 140, 'min_samples': 20, 'cluster_selection_epsilon': 0.3424890457681}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:28:43,808] Trial 13 finished with value: 0.15205388580596454 and parameters: {'min_cluster_size': 361, 'min_samples': 212, 'cluster_selection_epsilon': 0.010147508833013658}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:28:47,392] Trial 14 finished with value: 0.14091910809840552 and parameters: {'min_cluster_size': 487, 'min_samples': 287, 'cluster_selection_epsilon': 0.17007227538488603}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:29:15,139] Trial 15 finished with value: 0.23247932397019763 and parameters: {'min_cluster_size': 158, 'min_samples': 66, 'cluster_selection_epsilon': 0.3218021922409221}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:29:29,951] Trial 16 finished with value: 0.14172850206393964 and parameters: {'min_cluster_size': 132, 'min_samples': 44, 'cluster_selection_epsilon': 0.41237213088816616}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:29:45,229] Trial 17 finished with value: 0.12195729309842807 and parameters: {'min_cluster_size': 53, 'min_samples': 5, 'cluster_selection_epsilon': 0.5330675601521321}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:30:13,526] Trial 18 finished with value: 0.19249299129944686 and parameters: {'min_cluster_size': 322, 'min_samples': 114, 'cluster_selection_epsilon': 0.9797506835656595}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:30:19,929] Trial 19 finished with value: 0.07241907428741251 and parameters: {'min_cluster_size': 433, 'min_samples': 189, 'cluster_selection_epsilon': 0.12631321390489175}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:30:47,487] Trial 20 finished with value: 0.14472204165373564 and parameters: {'min_cluster_size': 172, 'min_samples': 82, 'cluster_selection_epsilon': 0.30321938410184185}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:31:14,786] Trial 21 finished with value: 0.2433332055925671 and parameters: {'min_cluster_size': 208, 'min_samples': 79, 'cluster_selection_epsilon': 0.2859704065237907}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:31:41,847] Trial 22 finished with value: 0.18452844737331608 and parameters: {'min_cluster_size': 109, 'min_samples': 73, 'cluster_selection_epsilon': 0.08985430888346985}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:32:03,258] Trial 23 finished with value: 0.21931670330859793 and parameters: {'min_cluster_size': 184, 'min_samples': 91, 'cluster_selection_epsilon': 0.36034924541136676}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:32:31,231] Trial 24 finished with value: 0.1538017539068185 and parameters: {'min_cluster_size': 344, 'min_samples': 134, 'cluster_selection_epsilon': 0.495827667467382}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:32:45,733] Trial 25 finished with value: 0.13273426525123735 and parameters: {'min_cluster_size': 207, 'min_samples': 46, 'cluster_selection_epsilon': 0.21866202361626896}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:32:56,082] Trial 26 finished with value: 0.10853199636065555 and parameters: {'min_cluster_size': 404, 'min_samples': 175, 'cluster_selection_epsilon': 0.07286755947199841}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:33:22,264] Trial 27 finished with value: 0.1553032598016155 and parameters: {'min_cluster_size': 99, 'min_samples': 59, 'cluster_selection_epsilon': 0.5326408019610426}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:33:49,359] Trial 28 finished with value: 0.08744827419544553 and parameters: {'min_cluster_size': 168, 'min_samples': 97, 'cluster_selection_epsilon': 0.292146418913192}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:33:52,867] Trial 29 finished with value: 0.16056783708958583 and parameters: {'min_cluster_size': 278, 'min_samples': 131, 'cluster_selection_epsilon': 0.1909327737094564}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:33:58,446] Trial 30 finished with value: 0.034913350649799016 and parameters: {'min_cluster_size': 222, 'min_samples': 81, 'cluster_selection_epsilon': 0.4054970410424087}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:34:10,582] Trial 31 finished with value: 0.18333142953438805 and parameters: {'min_cluster_size': 160, 'min_samples': 77, 'cluster_selection_epsilon': 0.3697183465781417}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:34:23,643] Trial 32 finished with value: 0.08847640006975364 and parameters: {'min_cluster_size': 189, 'min_samples': 93, 'cluster_selection_epsilon': 0.48084040577809084}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:34:49,624] Trial 33 finished with value: 0.23832373857099612 and parameters: {'min_cluster_size': 91, 'min_samples': 55, 'cluster_selection_epsilon': 0.3260050795745251}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:35:16,422] Trial 34 finished with value: 0.09746404608693816 and parameters: {'min_cluster_size': 94, 'min_samples': 56, 'cluster_selection_epsilon': 0.5863405469218453}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:35:43,721] Trial 35 finished with value: 0.11275814057631967 and parameters: {'min_cluster_size': 83, 'min_samples': 52, 'cluster_selection_epsilon': 0.27199348345832547}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:36:11,337] Trial 36 finished with value: 0.17310190091976346 and parameters: {'min_cluster_size': 135, 'min_samples': 31, 'cluster_selection_epsilon': 0.09292409427122247}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:36:14,905] Trial 37 finished with value: 0.03902810471124078 and parameters: {'min_cluster_size': 246, 'min_samples': 111, 'cluster_selection_epsilon': 0.22637293407219228}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:36:41,943] Trial 38 finished with value: 0.15233009560796393 and parameters: {'min_cluster_size': 68, 'min_samples': 30, 'cluster_selection_epsilon': 0.3421956464333285}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:37:09,403] Trial 39 finished with value: 0.17704905718031844 and parameters: {'min_cluster_size': 116, 'min_samples': 70, 'cluster_selection_epsilon': 0.6198042515344538}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:37:18,473] Trial 40 finished with value: 0.09189273490415288 and parameters: {'min_cluster_size': 305, 'min_samples': 132, 'cluster_selection_epsilon': 0.448398003552094}. Best is trial 8 with value: 0.24480007637936685.
+[I 2024-12-29 15:37:45,570] Trial 41 finished with value: 0.24577992091509632 and parameters: {'min_cluster_size': 203, 'min_samples': 89, 'cluster_selection_epsilon': 0.37260158024145795}. Best is trial 41 with value: 0.24577992091509632.
+[I 2024-12-29 15:38:12,330] Trial 42 finished with value: 0.24699965551353245 and parameters: {'min_cluster_size': 220, 'min_samples': 104, 'cluster_selection_epsilon': 0.2971762174516609}. Best is trial 42 with value: 0.24699965551353245.
+[I 2024-12-29 15:38:31,412] Trial 43 finished with value: 0.12923119170900235 and parameters: {'min_cluster_size': 268, 'min_samples': 103, 'cluster_selection_epsilon': 0.26877012493367636}. Best is trial 42 with value: 0.24699965551353245.
+[I 2024-12-29 15:38:34,409] Trial 44 finished with value: 0.07336928117249003 and parameters: {'min_cluster_size': 215, 'min_samples': 152, 'cluster_selection_epsilon': 0.39794252303131317}. Best is trial 42 with value: 0.24699965551353245.
+[I 2024-12-29 15:39:01,089] Trial 45 finished with value: 0.07956884825861656 and parameters: {'min_cluster_size': 240, 'min_samples': 119, 'cluster_selection_epsilon': 0.21057181919818074}. Best is trial 42 with value: 0.24699965551353245.
+[I 2024-12-29 15:39:27,560] Trial 46 finished with value: 0.17725399621760712 and parameters: {'min_cluster_size': 265, 'min_samples': 166, 'cluster_selection_epsilon': 0.05202975053232807}. Best is trial 42 with value: 0.24699965551353245.
+[I 2024-12-29 15:39:53,906] Trial 47 finished with value: 0.10232140097998765 and parameters: {'min_cluster_size': 295, 'min_samples': 123, 'cluster_selection_epsilon': 0.15859732712263572}. Best is trial 42 with value: 0.24699965551353245.
+[I 2024-12-29 15:39:56,885] Trial 48 finished with value: 0.01714808916251405 and parameters: {'min_cluster_size': 199, 'min_samples': 87, 'cluster_selection_epsilon': 0.2561844432499833}. Best is trial 42 with value: 0.24699965551353245.
+[I 2024-12-29 15:40:23,378] Trial 49 finished with value: 0.22052532085586796 and parameters: {'min_cluster_size': 325, 'min_samples': 195, 'cluster_selection_epsilon': 0.44688270861730306}. Best is trial 42 with value: 0.24699965551353245.
+[I 2024-12-29 15:40:50,116] Trial 50 finished with value: 0.14812451933776205 and parameters: {'min_cluster_size': 229, 'min_samples': 143, 'cluster_selection_epsilon': 0.854484350341933}. Best is trial 42 with value: 0.24699965551353245.
+[I 2024-12-29 15:40:54,779] Trial 51 finished with value: 0.08470406510929292 and parameters: {'min_cluster_size': 154, 'min_samples': 63, 'cluster_selection_epsilon': 0.3137334607992476}. Best is trial 42 with value: 0.24699965551353245.
+[I 2024-12-29 15:41:21,281] Trial 52 finished with value: 0.10724197677445589 and parameters: {'min_cluster_size': 147, 'min_samples': 68, 'cluster_selection_epsilon': 0.3259371131218663}. Best is trial 42 with value: 0.24699965551353245.
+[I 2024-12-29 15:41:48,802] Trial 53 finished with value: 0.2504835556906352 and parameters: {'min_cluster_size': 186, 'min_samples': 100, 'cluster_selection_epsilon': 0.3919440261236768}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:42:15,925] Trial 54 finished with value: 0.2503440827311408 and parameters: {'min_cluster_size': 251, 'min_samples': 102, 'cluster_selection_epsilon': 0.388072944285504}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:42:43,222] Trial 55 finished with value: 0.17772918773902757 and parameters: {'min_cluster_size': 255, 'min_samples': 101, 'cluster_selection_epsilon': 0.3843949162484908}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:42:46,527] Trial 56 finished with value: 0.15521416312285663 and parameters: {'min_cluster_size': 180, 'min_samples': 107, 'cluster_selection_epsilon': 0.43814782311330314}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:43:13,774] Trial 57 finished with value: 0.1633290365284834 and parameters: {'min_cluster_size': 231, 'min_samples': 116, 'cluster_selection_epsilon': 0.5283469505210086}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:43:16,982] Trial 58 finished with value: 0.01714808916251405 and parameters: {'min_cluster_size': 209, 'min_samples': 87, 'cluster_selection_epsilon': 0.4613273368813876}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:43:45,050] Trial 59 finished with value: 0.18251843904076728 and parameters: {'min_cluster_size': 497, 'min_samples': 244, 'cluster_selection_epsilon': 0.24945953465349024}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:43:50,583] Trial 60 finished with value: 0.08393162661793806 and parameters: {'min_cluster_size': 421, 'min_samples': 412, 'cluster_selection_epsilon': 0.12814549105328837}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:44:11,111] Trial 61 finished with value: 0.20306659861122697 and parameters: {'min_cluster_size': 285, 'min_samples': 125, 'cluster_selection_epsilon': 0.35989245344258425}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:44:14,115] Trial 62 finished with value: 0.05302545326666622 and parameters: {'min_cluster_size': 191, 'min_samples': 95, 'cluster_selection_epsilon': 0.29003436090117435}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:44:17,680] Trial 63 finished with value: 0.031588315527782906 and parameters: {'min_cluster_size': 257, 'min_samples': 142, 'cluster_selection_epsilon': 0.4071593926594005}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:44:45,267] Trial 64 finished with value: 0.14822492237714507 and parameters: {'min_cluster_size': 121, 'min_samples': 99, 'cluster_selection_epsilon': 0.33788479299539315}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:45:12,284] Trial 65 finished with value: 0.2500481039376583 and parameters: {'min_cluster_size': 201, 'min_samples': 108, 'cluster_selection_epsilon': 0.18502604233443323}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:45:39,602] Trial 66 finished with value: 0.07968229566780463 and parameters: {'min_cluster_size': 213, 'min_samples': 105, 'cluster_selection_epsilon': 0.1230012547249387}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:45:43,094] Trial 67 finished with value: 0.01714808916251405 and parameters: {'min_cluster_size': 169, 'min_samples': 87, 'cluster_selection_epsilon': 0.04331895773834385}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:45:49,134] Trial 68 finished with value: 0.034913350649799016 and parameters: {'min_cluster_size': 198, 'min_samples': 81, 'cluster_selection_epsilon': 0.19280818609609662}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:46:17,374] Trial 69 finished with value: 0.17725399621760712 and parameters: {'min_cluster_size': 375, 'min_samples': 166, 'cluster_selection_epsilon': 0.18792015538023119}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:46:44,224] Trial 70 finished with value: 0.25047859439258335 and parameters: {'min_cluster_size': 240, 'min_samples': 110, 'cluster_selection_epsilon': 0.24203982307362962}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:47:11,844] Trial 71 finished with value: 0.10232140097998765 and parameters: {'min_cluster_size': 237, 'min_samples': 123, 'cluster_selection_epsilon': 0.25006477729642357}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:47:38,305] Trial 72 finished with value: 0.1833203649779935 and parameters: {'min_cluster_size': 222, 'min_samples': 109, 'cluster_selection_epsilon': 0.2943879333779915}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:47:46,508] Trial 73 finished with value: 0.10676800761285099 and parameters: {'min_cluster_size': 179, 'min_samples': 90, 'cluster_selection_epsilon': 0.22541632175286433}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:48:13,275] Trial 74 finished with value: 0.21739303948680774 and parameters: {'min_cluster_size': 200, 'min_samples': 76, 'cluster_selection_epsilon': 0.1266713370791326}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:48:17,007] Trial 75 finished with value: 0.16043073376805936 and parameters: {'min_cluster_size': 258, 'min_samples': 113, 'cluster_selection_epsilon': 0.3742488715791574}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:48:21,796] Trial 76 finished with value: 0.0579458419199744 and parameters: {'min_cluster_size': 242, 'min_samples': 137, 'cluster_selection_epsilon': 0.006259960452227514}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:48:26,083] Trial 77 finished with value: 0.11174058969545678 and parameters: {'min_cluster_size': 462, 'min_samples': 375, 'cluster_selection_epsilon': 0.41912551249172747}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:48:53,251] Trial 78 finished with value: 0.18930757120788497 and parameters: {'min_cluster_size': 317, 'min_samples': 128, 'cluster_selection_epsilon': 0.17593486091405786}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:49:20,359] Trial 79 finished with value: 0.14826184572969062 and parameters: {'min_cluster_size': 276, 'min_samples': 98, 'cluster_selection_epsilon': 0.48489397842349874}. Best is trial 53 with value: 0.2504835556906352.
+[I 2024-12-29 15:49:45,534] Trial 80 finished with value: 0.250660904072524 and parameters: {'min_cluster_size': 220, 'min_samples': 117, 'cluster_selection_epsilon': 0.28479667859306007}. Best is trial 80 with value: 0.250660904072524.
+[I 2024-12-29 15:49:49,237] Trial 81 finished with value: 0.035866624454439014 and parameters: {'min_cluster_size': 220, 'min_samples': 118, 'cluster_selection_epsilon': 0.2850198850360887}. Best is trial 80 with value: 0.250660904072524.
+[I 2024-12-29 15:50:09,225] Trial 82 finished with value: 0.12923119170900235 and parameters: {'min_cluster_size': 205, 'min_samples': 103, 'cluster_selection_epsilon': 0.35779665609290695}. Best is trial 80 with value: 0.250660904072524.
+[I 2024-12-29 15:50:12,423] Trial 83 finished with value: 0.03902810471124078 and parameters: {'min_cluster_size': 187, 'min_samples': 111, 'cluster_selection_epsilon': 0.24106736772132314}. Best is trial 80 with value: 0.250660904072524.
+[I 2024-12-29 15:50:25,906] Trial 84 finished with value: 0.08847640006975364 and parameters: {'min_cluster_size': 232, 'min_samples': 93, 'cluster_selection_epsilon': 0.31132936240549874}. Best is trial 80 with value: 0.250660904072524.
+[I 2024-12-29 15:50:54,200] Trial 85 finished with value: 0.09262759545759253 and parameters: {'min_cluster_size': 251, 'min_samples': 83, 'cluster_selection_epsilon': 0.20487239931465098}. Best is trial 80 with value: 0.250660904072524.
+[I 2024-12-29 15:51:22,257] Trial 86 finished with value: 0.2500481039376583 and parameters: {'min_cluster_size': 168, 'min_samples': 108, 'cluster_selection_epsilon': 0.38612831623976573}. Best is trial 80 with value: 0.250660904072524.
+[I 2024-12-29 15:51:25,870] Trial 87 finished with value: 0.15521416312285663 and parameters: {'min_cluster_size': 166, 'min_samples': 107, 'cluster_selection_epsilon': 0.15354705534783228}. Best is trial 80 with value: 0.250660904072524.
+[I 2024-12-29 15:51:54,511] Trial 88 finished with value: 0.19569730859293333 and parameters: {'min_cluster_size': 342, 'min_samples': 160, 'cluster_selection_epsilon': 0.42227239996253546}. Best is trial 80 with value: 0.250660904072524.
+[I 2024-12-29 15:52:22,502] Trial 89 finished with value: 0.2503440827311408 and parameters: {'min_cluster_size': 152, 'min_samples': 102, 'cluster_selection_epsilon': 0.35065356120715124}. Best is trial 80 with value: 0.250660904072524.
+[I 2024-12-29 15:52:50,278] Trial 90 finished with value: 0.2504835556906352 and parameters: {'min_cluster_size': 155, 'min_samples': 100, 'cluster_selection_epsilon': 0.38200240487762943}. Best is trial 80 with value: 0.250660904072524.
+[I 2024-12-29 15:53:19,989] Trial 91 finished with value: 0.17772918773902757 and parameters: {'min_cluster_size': 126, 'min_samples': 101, 'cluster_selection_epsilon': 0.38144311783994234}. Best is trial 80 with value: 0.250660904072524.
+[I 2024-12-29 15:53:48,322] Trial 92 finished with value: 0.07968229566780463 and parameters: {'min_cluster_size': 146, 'min_samples': 105, 'cluster_selection_epsilon': 0.2704898363033169}. Best is trial 80 with value: 0.250660904072524.
+[I 2024-12-29 15:54:15,747] Trial 93 finished with value: 0.17943990930913736 and parameters: {'min_cluster_size': 175, 'min_samples': 120, 'cluster_selection_epsilon': 0.3568929156647678}. Best is trial 80 with value: 0.250660904072524.
+[I 2024-12-29 15:54:26,721] Trial 94 finished with value: 0.2092168499404453 and parameters: {'min_cluster_size': 158, 'min_samples': 96, 'cluster_selection_epsilon': 0.39481819868579776}. Best is trial 80 with value: 0.250660904072524.
+[I 2024-12-29 15:54:30,059] Trial 95 finished with value: 0.03902810471124078 and parameters: {'min_cluster_size': 193, 'min_samples': 111, 'cluster_selection_epsilon': 0.46261863070006004}. Best is trial 80 with value: 0.250660904072524.
+[I 2024-12-29 15:54:56,672] Trial 96 finished with value: 0.2503440827311408 and parameters: {'min_cluster_size': 142, 'min_samples': 102, 'cluster_selection_epsilon': 0.5121586325637892}. Best is trial 80 with value: 0.250660904072524.
+[I 2024-12-29 15:55:24,444] Trial 97 finished with value: 0.2504835556906352 and parameters: {'min_cluster_size': 110, 'min_samples': 100, 'cluster_selection_epsilon': 0.6230492619571586}. Best is trial 80 with value: 0.250660904072524.
+[I 2024-12-29 15:55:53,938] Trial 98 finished with value: 0.1633290365284834 and parameters: {'min_cluster_size': 139, 'min_samples': 116, 'cluster_selection_epsilon': 0.5850531668494605}. Best is trial 80 with value: 0.250660904072524.
+[I 2024-12-29 15:56:24,093] Trial 99 finished with value: 0.2500481039376583 and parameters: {'min_cluster_size': 116, 'min_samples': 108, 'cluster_selection_epsilon': 0.5823346428469303}. Best is trial 80 with value: 0.250660904072524.
+
+Optimization Results:
+Best parameters: {'min_cluster_size': 220, 'min_samples': 117, 'cluster_selection_epsilon': 0.28479667859306007}
+Best trial metrics:
+Number of clusters: 2
+Silhouette score: 0.614
+Adjusted Rand Index: 0.020
+NMI score: 0.011
+Noise ratio: 0.033
