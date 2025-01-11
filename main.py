@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 import main_imputer as imp
+import artificial_nn as ann
 from sklearn.preprocessing import LabelEncoder,  MinMaxScaler, StandardScaler
 
 
@@ -123,39 +124,5 @@ data = pd.read_csv('adult.csv')
 
 #call the function the the file main_imputer to celan the data 
 data,encoder,scaler = imp.cleaning_features(data,numeric_cols,feature_selected_out)
-data_to_drop=data.copy()
-data_knn=data.copy()
-
-
-print("\n---------------------------------------------")
-print(f"drop nan rows from adult dataset ")
-print("---------------------------------------------\n")
-imp.drop_nan_values(data_to_drop,scaler)
-
-print("\n---------------------------------------------")
-print(f"replace missing data with mode and mean ")
-print("---------------------------------------------\n")
-#imp.experments_dataset_prep(data,imputable_columns,scaler)
-
-#correlation_matrix(data)
-
-print("\n---------------------------------------------")
-print(f"replace missing data with imputer ")
-print("---------------------------------------------\n")
-#imputer_data=imp.adult_imputer(imputable_columns,5,data)
-
-
-
-print("\n---------------------------------------------")
-print(f"replace missing data with imputer for random forest  ")
-print("---------------------------------------------\n")
-#imputer_data=imp.adult_imputer_dt(imputable_columns,10,data,scaler)
-
-print("\n---------------------------------------------")
-print(f"replace missing data with imputer for random forest  ")
-print("---------------------------------------------\n")
-#knn_claisifer_missing_data_inputed=train_knn(imputable_columns_knn_clasifier,10,data_knn,scaler)
-
-
-
+ann.ann_main(data)
 

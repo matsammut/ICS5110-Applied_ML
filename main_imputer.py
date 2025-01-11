@@ -6,7 +6,7 @@ from sklearn.impute import KNNImputer
 def cleaning_features(data, numeric_cols,drop_columns):
     le = LabelEncoder()
     scaler = StandardScaler()
-    encoder = OneHotEncoder(sparse_output=False)
+    encoder = OneHotEncoder()
 
     data.replace({'?': np.nan, 99999: np.nan}, inplace=True)
     #check which columns have missing values
@@ -20,12 +20,13 @@ def cleaning_features(data, numeric_cols,drop_columns):
     
     columns_to_encode = ['race','marital-status','relationship']
     # 3. One-hot encode race
-    for N in columns_to_encode:
-        race_encoded = encoder.fit_transform(data[[N]])
-        race_encoded_cols = encoder.get_feature_names_out([N])
-        race_encoded_df = pd.DataFrame(race_encoded, columns=race_encoded_cols, index=data.index)
-        # Combine the encoded data with original dataframe
-        data = pd.concat([data.drop(N, axis=1), race_encoded_df], axis=1)
+    race_encoded = pd.get_dummies(data['race'], prefix='race').astype(int)
+    data = pd.concat([data.drop('race', axis=1), race_encoded], axis=1)
+    # race_encoded = encoder.fit_transform(data[['race']])
+    # race_encoded_cols = encoder.get_feature_names_out(['race'])
+    # race_encoded_df = pd.DataFrame(race_encoded, columns=race_encoded_cols, index=data.index)
+    # # Combine the encoded data with original dataframe
+    # data = pd.concat([data.drop('race', axis=1), race_encoded_df], axis=1)
     # Binarize native country
     data['native-country'] = data['native-country'].apply(lambda x: x == 'United-States')
     data['native-country'] = data['native-country'].astype(int)
