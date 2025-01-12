@@ -7,12 +7,14 @@
 </head>
 <body>
   <h1>Adult Income Predictor</h1>
-  <p>Click below to access the prediction tool:</p>
+
   
-  <a href="https://huggingface.co/spaces/matsammut/ICS5110-Applied_ML" 
-     target="_blank" 
-     style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; font-size: 18px;">
-    Open Prediction Tool
-  </a>
+  <script
+	type="module"
+	src="https://gradio.s3-us-west-2.amazonaws.com/5.12.0/gradio.js"
+    ></script>
+
+    <gradio-app src="https://matsammut-ics5110-applied-ml.hf.space"></gradio-app>
+
 </body>
 </html>
