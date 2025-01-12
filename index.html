@@ -1,13 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello World</title>
-    
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ANN Prediction</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    form {
+      margin-bottom: 20px;
+    }
+    input {
+      margin: 5px 0;
+    }
+    button {
+      padding: 10px 15px;
+      font-size: 16px;
+    }
+    .output {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-    <p>
-        Hello World Lorem ipsum dolor sit amet consectetur adipisicing elit. Mollitia ab animi dicta quas, cumque corporis laudantium quos ipsam veritatis eaque eum quod placeat obcaecati delectus sint fuga! Eveniet, fugit nesciunt.
-    </p>
+  <h1>ANN Prediction Tool</h1>
+  <form id="prediction-form">
+    <label>Feature 1: <input type="number" name="feature1" required></label><br>
+    <label>Feature 2: <input type="number" name="feature2" required></label><br>
+    <!-- Add more input fields as required by your model -->
+    <button type="submit">Predict</button>
+  </form>
+
+  <div class="output" id="output"></div>
+
+  <script>
+    const form = document.getElementById('prediction-form');
+    const outputDiv = document.getElementById('output');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();  // Prevent the form from reloading the page
+
+      // Collect form data
+      const formData = new FormData(form);
+      const features = [];
+      for (const [key, value] of formData.entries()) {
+        features.push(parseFloat(value));  // Convert inputs to numbers
+      }
+
+      // Send data to the backend
+      try {
+        const response = await fetch('https://<your-backend-api-url>/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ features })
+        });
+
+        const result = await response.json();
+        outputDiv.textContent = `Prediction: ${result.prediction}`;
+      } catch (error) {
+        outputDiv.textContent = 'Error occurred while predicting!';
+        console.error(error);
+      }
+    });
+  </script>
 </body>
+</html>
