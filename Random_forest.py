@@ -5,12 +5,11 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, f1_score, recall_score
-from sklearn.preprocessing import LabelEncoder, StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler, QuantileTransformer
+from sklearn.preprocessing import LabelEncoder, StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler, QuantileTransformer,OneHotEncoder
 import warnings
-import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
-from sklearn.model_selection import cross_val_score
-import seaborn as sns
+from sklearn.model_selection import cross_val_score, cross_validate
+import joblib
 
 warnings.filterwarnings("ignore")
 
@@ -20,7 +19,7 @@ random.seed(SEED)
 np.random.seed(SEED)
 
 # Data Preprocessing Function
-def Rescaling_experiments(data, numeric_cols, columns_to_encode, scaling_method, encoding_type="onehot"):
+def Rescaling_experiments(data, numeric_cols, scaling_method):
     # Apply scaling to numeric columns
     if scaling_method == 0:  # No Scaling
         pass
@@ -36,42 +35,39 @@ def Rescaling_experiments(data, numeric_cols, columns_to_encode, scaling_method,
         data[numeric_cols] = QuantileTransformer(output_distribution='uniform', random_state=SEED).fit_transform(data[numeric_cols])
     elif scaling_method == 6:  # QuantileTransformer (Normal)
         data[numeric_cols] = QuantileTransformer(output_distribution='normal', random_state=SEED).fit_transform(data[numeric_cols])
-
-    # Apply encoding to categorical columns
-    if encoding_type == "onehot":
-        data = pd.get_dummies(data, columns=columns_to_encode).astype(int)
-
+    
+    
+   
     return data
 
 # Objective Function for Optuna
 def objective(trial):
     params = {
-        'n_estimators': trial.suggest_int('n_estimators', 100, 900, step=50),
-        'criterion': trial.suggest_categorical('criterion', ['gini', 'entropy', 'log_loss']),
-        'max_depth': trial.suggest_int('max_depth', 5, 50),
-        'min_samples_split': trial.suggest_int('min_samples_split', 2, 20),
-        'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 20),
-        'max_features': trial.suggest_categorical('max_features', ['sqrt', 'log2', None]),
-        'bootstrap': trial.suggest_categorical('bootstrap', [True, False]),
-        'ccp_alpha': trial.suggest_float('ccp_alpha', 0.0, 0.1, step=0.005),
-        'class_weight': trial.suggest_categorical('class_weight', [None, 'balanced']),
-        'random_state': 42  # Fixed for reproducibility
+        'n_estimators': trial.suggest_int('n_estimators', 100, 1500, step=100),  # Smaller range
+        'criterion': trial.suggest_categorical('criterion', ['gini', 'entropy']),
+        'max_depth': trial.suggest_int('max_depth', 10, 100),  # Smaller range
+        'min_samples_split': trial.suggest_int('min_samples_split', 2, 50),  # Narrowed range
+        'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 50),  # Narrowed range
+        'max_features': trial.suggest_categorical('max_features', ['sqrt', 'log2']),
+        'bootstrap': trial.suggest_categorical('bootstrap', [True]),  # Fixed to True to simplify
+        'ccp_alpha': trial.suggest_float('ccp_alpha', 0.0, 0.01, step=0.001),  # Smaller range
+        'class_weight': trial.suggest_categorical('class_weight', ['balanced', None]),  # Limited options
+        'random_state': 42  # Fixed to ensure reproducibility
     }
 
-    # Use all available CPU cores
+    # Use cross-validation score instead of single train-test split
     clf = RandomForestClassifier(**params, n_jobs=-1)
-    clf.fit(X_train, y_train)
-
-    y_pred = clf.predict(X_test)
-    accuracy = accuracy_score(y_test, y_pred)
-    return accuracy
+    scores = cross_val_score(clf, X_train, y_train, cv=5, scoring='accuracy', n_jobs=-1)
+    
+    # Return mean cross-validation score
+    return scores.mean()
 
 
 # Load Dataset
-data = pd.read_csv('Decision_tree_datasets/imputed_dataset_with_more_features.csv')
+data = pd.read_csv('dataset.csv')
 
 # Configuration
-columns_to_encode = ['workclass', 'occupation']
+
 numeric_cols = ['age', 'educational-num', 'hours-per-week']
 
 # Loop over different scaling methods
@@ -84,309 +80,114 @@ scaling_methods = {
     5: "QuantileTransformer (Uniform)",
     6: "QuantileTransformer (Normal)"
 }
+
+
+
 scaling_method = 0
 all_results = []
+
 """
-for Trial in range(100, 800, 100):
-    for scaling_method in scaling_methods:
+for Trial in range(100, 700, 100):
+    for scaling_method in range(0, 7):
         print(f"Testing Scaling Method: {scaling_methods[scaling_method]}")
         
-        # Preprocess data
-        processed_data = Rescaling_experiments(data.copy(), numeric_cols, columns_to_encode, scaling_method, encoding_type="onehot")
-        print(processed_data.columns)
+        processed_data = Rescaling_experiments(data.copy(), numeric_cols, scaling_method)
         x = processed_data.drop(columns=['income'])
         y = processed_data['income']
 
-        # Train-test split
+        # Single train-test split for final evaluation
         X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=SEED)
 
-        # Run Optuna
+        # Hyperparameter optimization with cross-validation
         study = optuna.create_study(direction="maximize", sampler=optuna.samplers.TPESampler(seed=SEED))
-        study.optimize(objective, n_trials=Trial, n_jobs=-1, show_progress_bar=True)
+        study.optimize(objective, n_trials=Trial,  show_progress_bar=True)
 
-        # Best model
+        # Train final model with best parameters
         best_params = study.best_params
-        #best_params ={'n_estimators': 500, 'criterion': 'gini', 'max_depth': 22, 'min_samples_split': 18, 'min_samples_leaf': 4, 'max_features': None, 'bootstrap': True, 'ccp_alpha': 0.0, 'class_weight': None}
-        best_model = RandomForestClassifier(**best_params)
+        best_model = RandomForestClassifier(**best_params, n_jobs=-1)
+        
+        # Perform k-fold cross-validation on the entire training set
+        cv_scores = cross_validate(best_model, X_train, y_train, cv=5, 
+                         scoring=['accuracy', 'precision_weighted', 'recall_weighted', 'f1_weighted'])
+        
+        # Final evaluation on test set
         best_model.fit(X_train, y_train)
-
-        # Evaluate model
         y_pred = best_model.predict(X_test)
-        accuracy = accuracy_score(y_test, y_pred)
-        precision = precision_score(y_test, y_pred, average="weighted")
-        f1 = f1_score(y_test, y_pred, average="weighted")
-        recall = recall_score(y_test, y_pred, average="weighted")
+        
+        # Calculate metrics
+        test_accuracy = accuracy_score(y_test, y_pred)
+        test_precision = precision_score(y_test, y_pred, average="weighted")
+        test_f1 = f1_score(y_test, y_pred, average="weighted")
+        test_recall = recall_score(y_test, y_pred, average="weighted")
 
-        print(f"Best Params: {best_params}")
-        print(f"Results - Accuracy: {accuracy:.4f}, Precision: {precision:.4f}, F1: {f1:.4f}, Recall: {recall:.4f}")
-
-        # Store results
+        # Store both cross-validation and test results
         all_results.append({
             'Trial no': Trial,
             'Scaling_Method': scaling_methods[scaling_method],
-            'Accuracy': accuracy,
-            'Precision': precision,
-            'F1': f1,
-            'Recall': recall,
-            'Best Params': best_params
+            'CV_Accuracy_Mean': cv_scores['test_accuracy'].mean(),
+            'CV_Accuracy_Std': cv_scores['test_accuracy'].std(),
+            'Test_Accuracy': test_accuracy,
+            'Test_Precision': test_precision,
+            'Test_F1': test_f1,
+            'Test_Recall': test_recall,
+            'Best_Params': best_params
         })
 
 # Convert results to DataFrame
 results_df = pd.DataFrame(all_results)
 print("\nFinal Results Summary:")
-results_df.to_csv('graphs/random_forest_run_5_with_more_features.csv', index=False)
+results_df.to_csv('Dataset_3_run2.csv', index=False)
 print(results_df)
 """
 
 #####################################
 
 
-def experiment_no_1():
-    print(f"Experiment 1")
-    data = pd.read_csv('Decision_tree_datasets/imputed_dataset_Not_all_features.csv')
-    
-    print(f"Testing Scaling Method 0 NO Scaling")
-    scaling_method = 0
-    # Preprocess data
-    processed_data = Rescaling_experiments(data.copy(), numeric_cols, columns_to_encode, scaling_method, encoding_type="onehot")
-    
+print(f"Testing Scaling Method: {scaling_methods[scaling_method]}")
+        
+processed_data = Rescaling_experiments(data.copy(), numeric_cols, scaling_method=6)
+x = processed_data.drop(columns=['income'])
+y = processed_data['income']
 
-    x = processed_data.drop(columns=['income'])
-    y = processed_data['income']
 
-    # Train-test split
-    X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=SEED)
-
-    # Run Optuna
-    #study = optuna.create_study(direction="maximize", sampler=optuna.samplers.TPESampler(seed=SEED))
-    #study.optimize(objective, n_trials=Trial, n_jobs=-1, show_progress_bar=True)
-
-    # Best model
-    #best_params = study.best_params
-    best_params ={'n_estimators': 850, 'criterion': 'log_loss', 'max_depth': 17, 'min_samples_split': 15, 'min_samples_leaf': 1, 'max_features': None, 'bootstrap': True, 'ccp_alpha': 0.0, 'class_weight': None}
-    best_model = RandomForestClassifier(**best_params)
-   
-    best_model.fit(X_train, y_train)
+print(x.head())
+print(y.head())
+# Single train-test split for final evaluation
+X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=SEED)
 
 
 
-
-    importances = best_model.feature_importances_
-    feature_importance = pd.DataFrame({'Feature': x.columns, 'Importance': importances})
-    feature_importance.sort_values(by='Importance', ascending=False, inplace=True)
-   # print("Feature Importance:\n", feature_importance)
-    # Evaluate model
-    y_pred = best_model.predict(X_test)
-    accuracy = accuracy_score(y_test, y_pred)
-    precision = precision_score(y_test, y_pred, average="weighted")
-    f1 = f1_score(y_test, y_pred, average="weighted")
-    recall = recall_score(y_test, y_pred, average="weighted")
-
-    print(f"Best Params: {best_params}")
-    print(f"Results - Accuracy: {accuracy:.4f}, Precision: {precision:.4f}, F1: {f1:.4f}, Recall: {recall:.4f}")
-
-
-    # Cross-validation
-
-    # Store results
-    all_results.append({
-        'Scaling_Method': scaling_methods[scaling_method],
-        'Accuracy': accuracy,
-        'Precision': precision,
-        'F1': f1,
-        'Recall': recall,
-        'Best Params': best_params
-    })
-    cm = confusion_matrix(y_test, y_pred)
-
-    # Print the confusion matrix
-    print("Confusion Matrix:")
-    print(cm)
+DTC=RandomForestClassifier
+best_model = DTC(
+    n_estimators=1400,         # Number of trees in the forest
+    criterion='entropy',       # Split quality: 'entropy' for information gain
+    max_depth=96,              # Maximum depth of each tree
+    min_samples_split=50,      # Minimum number of samples required to split an internal node
+    min_samples_leaf=1,        # Minimum number of samples required to be at a leaf node
+    max_features='sqrt',       # Number of features to consider for splitting at each node ('sqrt' = square root of features)
+    bootstrap=True,            # Whether bootstrap samples are used when building trees
+    ccp_alpha=0.0,             # Complexity parameter for pruning (0.0 = no pruning)
+    class_weight=None,         # Weights associated with classes (None = all classes are weighted equally)
+    random_state=42            # Seed for reproducibility
+)
 
 
-def experiment_no_2():
-    print(f"Experiment 2")
+best_model.fit(X_train,y_train)
+###########################################################
+#predict the test set
+prediction=best_model.predict(X_test)
 
-    data = pd.read_csv('Decision_tree_datasets/imputed_dataset_with_more_features.csv')
-    
-    print(f"Testing Scaling Method 0 NO Scaling")
-    scaling_method = 0
-    # Preprocess data
-    processed_data = Rescaling_experiments(data.copy(), numeric_cols, columns_to_encode, scaling_method, encoding_type="onehot")
-    
+acc_score = accuracy_score(y_test, prediction)
+print(f"Accuracy: {acc_score}")
+joblib.dump(best_model, 'best_random_forest_model.joblib')
 
-    x = processed_data.drop(columns=['income'])
-    y = processed_data['income']
+###
+model = joblib.load('best_random_forest_model.joblib')
 
-    # Train-test split
-    X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=SEED)
-
-    # Run Optuna
-    #study = optuna.create_study(direction="maximize", sampler=optuna.samplers.TPESampler(seed=SEED))
-    #study.optimize(objective, n_trials=Trial, n_jobs=-1, show_progress_bar=True)
-
-    # Best model
-    #best_params = study.best_params
-    best_params ={'n_estimators': 850, 'criterion': 'log_loss', 'max_depth': 17, 'min_samples_split': 15, 'min_samples_leaf': 1, 'max_features': None, 'bootstrap': True, 'ccp_alpha': 0.0, 'class_weight': None}
-    best_model = RandomForestClassifier(**best_params)
-   
-    best_model.fit(X_train, y_train)
-
-
-
-
-    importances = best_model.feature_importances_
-    feature_importance = pd.DataFrame({'Feature': x.columns, 'Importance': importances})
-    feature_importance.sort_values(by='Importance', ascending=False, inplace=True)
-   # print("Feature Importance:\n", feature_importance)
-    # Evaluate model
-    y_pred = best_model.predict(X_test)
-    accuracy = accuracy_score(y_test, y_pred)
-    precision = precision_score(y_test, y_pred, average="weighted")
-    f1 = f1_score(y_test, y_pred, average="weighted")
-    recall = recall_score(y_test, y_pred, average="weighted")
-
-    print(f"Best Params: {best_params}")
-    print(f"Results - Accuracy: {accuracy:.4f}, Precision: {precision:.4f}, F1: {f1:.4f}, Recall: {recall:.4f}")
-
-
-    # Cross-validation
-
-    # Store results
-    all_results.append({
-        'Scaling_Method': scaling_methods[scaling_method],
-        'Accuracy': accuracy,
-        'Precision': precision,
-        'F1': f1,
-        'Recall': recall,
-        'Best Params': best_params
-    })
-    cm = confusion_matrix(y_test, y_pred)
-
-    # Print the confusion matrix
-    print("Confusion Matrix:")
-    print(cm)
-
-def experiment_no_3():
-    print(f"Experiment 3")
-
-    data = pd.read_csv('Decision_tree_datasets/imputed_dataset_withmean.csv')
-    
-    print(f"Testing Scaling Method 0 NO Scaling")
-    scaling_method = 0
-    # Preprocess data
-    processed_data = Rescaling_experiments(data.copy(), numeric_cols, columns_to_encode, scaling_method, encoding_type="onehot")
-    
-
-    x = processed_data.drop(columns=['income'])
-    y = processed_data['income']
-
-    # Train-test split
-    X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=SEED)
-
-    
-    best_params ={'n_estimators': 850, 'criterion': 'log_loss', 'max_depth': 17, 'min_samples_split': 15, 'min_samples_leaf': 1, 'max_features': None, 'bootstrap': True, 'ccp_alpha': 0.0, 'class_weight': None}
-    best_model = RandomForestClassifier(**best_params)
-   
-    best_model.fit(X_train, y_train)
-
-
-
-
-    importances = best_model.feature_importances_
-    feature_importance = pd.DataFrame({'Feature': x.columns, 'Importance': importances})
-    feature_importance.sort_values(by='Importance', ascending=False, inplace=True)
-    #print("Feature Importance:\n", feature_importance)
-    # Evaluate model
-    y_pred = best_model.predict(X_test)
-    accuracy = accuracy_score(y_test, y_pred)
-    precision = precision_score(y_test, y_pred, average="weighted")
-    f1 = f1_score(y_test, y_pred, average="weighted")
-    recall = recall_score(y_test, y_pred, average="weighted")
-
-    print(f"Best Params: {best_params}")
-    print(f"Results - Accuracy: {accuracy:.4f}, Precision: {precision:.4f}, F1: {f1:.4f}, Recall: {recall:.4f}")
-
-
-    # Cross-validation
-
-    # Store results
-    all_results.append({
-        'Scaling_Method': scaling_methods[scaling_method],
-        'Accuracy': accuracy,
-        'Precision': precision,
-        'F1': f1,
-        'Recall': recall,
-        'Best Params': best_params
-    })
-    cm = confusion_matrix(y_test, y_pred)
-
-    # Print the confusion matrix
-    print("Confusion Matrix:")
-    print(cm)
-
-
-def experiment_no_4():
-    print(f"Experiment 4")
-
-    data = pd.read_csv('Decision_tree_datasets/orignal_data_droped_nan_values.csv')
-    
-    print(f"Testing Scaling Method 0 NO Scaling")
-    scaling_method = 0
-    # Preprocess data
-    processed_data = Rescaling_experiments(data.copy(), numeric_cols, columns_to_encode, scaling_method, encoding_type="onehot")
-    
-
-    x = processed_data.drop(columns=['income'])
-    y = processed_data['income']
-
-    # Train-test split
-    X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=SEED)
-
-    
-    best_params ={'n_estimators': 850, 'criterion': 'log_loss', 'max_depth': 17, 'min_samples_split': 15, 'min_samples_leaf': 1, 'max_features': None, 'bootstrap': True, 'ccp_alpha': 0.0, 'class_weight': None}
-    best_model = RandomForestClassifier(**best_params)
-   
-    best_model.fit(X_train, y_train)
-
-
-
-
-    importances = best_model.feature_importances_
-    feature_importance = pd.DataFrame({'Feature': x.columns, 'Importance': importances})
-    feature_importance.sort_values(by='Importance', ascending=False, inplace=True)
-    #print("Feature Importance:\n", feature_importance)
-    # Evaluate model
-    y_pred = best_model.predict(X_test)
-    accuracy = accuracy_score(y_test, y_pred)
-    precision = precision_score(y_test, y_pred, average="weighted")
-    f1 = f1_score(y_test, y_pred, average="weighted")
-    recall = recall_score(y_test, y_pred, average="weighted")
-
-    print(f"Best Params: {best_params}")
-    print(f"Results - Accuracy: {accuracy:.4f}, Precision: {precision:.4f}, F1: {f1:.4f}, Recall: {recall:.4f}")
-
-
-    # Cross-validation
-
-    # Store results
-    all_results.append({
-        'Scaling_Method': scaling_methods[scaling_method],
-        'Accuracy': accuracy,
-        'Precision': precision,
-        'F1': f1,
-        'Recall': recall,
-        'Best Params': best_params
-    })
-    cm = confusion_matrix(y_test, y_pred)
-
-    # Print the confusion matrix
-    print("Confusion Matrix:")
-    print(cm)
-
-#decision tree suing all features excepet education and fnlwgt
-#experiment_no_1()
-#experiment_no_2()
-#experiment_no_3()
-experiment_no_4()
-
+# Predict
+prediction = best_model.predict([[29.0, 32.0, 10.0, 1, 0.0, 0, 60.0, 0, 0.0, 0.0, 0.0, 
+                           1.0, -1.0684422957824236, 0.4608239854737111, 0.18642692922290538, 
+                           -0.35369893417798676, -0.057252251562758275, -0.12196223718457576, 
+                           0.003853627562193318, 0.7764769793931923, -0.05051009021640369, 
+                           0.13568970638338268]])
+print(prediction[0])
