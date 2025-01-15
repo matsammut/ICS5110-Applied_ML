@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder, StandardScaler, OneHotEncoder
 from sklearn.impute import KNNImputer
+import pickle
 
 def cleaning_features(data, numeric_cols,drop_columns):
     le = LabelEncoder()
@@ -17,8 +18,16 @@ def cleaning_features(data, numeric_cols,drop_columns):
     # 2. Label encode gender and income
     data['gender'] = le.fit_transform(data['gender'])
     data['income'] = le.fit_transform(data['income'])
+    data['workclass'] = le.fit_transform(data['workclass'])
+    with open('label_encoder_work.pkl', 'wb') as le_file:
+        pickle.dump(le, le_file)
+
+    data['occupation'] = le.fit_transform(data['occupation'])
+    with open('label_encoder_occ.pkl', 'wb') as le_file:
+        pickle.dump(le, le_file)
     
-    columns_to_encode = ['race','marital-status','relationship']
+    #columns_to_encode = ['race','marital-status','relationship']
+    columns_to_encode = ['race']
     # 3. One-hot encode race
     for N in columns_to_encode:
         race_encoded = encoder.fit_transform(data[[N]])
@@ -33,6 +42,12 @@ def cleaning_features(data, numeric_cols,drop_columns):
     print(data.head(10))
 
     data = data.drop(columns=drop_columns, axis=1)
+
+    
+    with open('scaler.pkl', 'wb') as scaler_file:
+        pickle.dump(scaler, scaler_file)
+    with open('race_onehot_encoder.pkl', 'wb') as enc_file:
+        pickle.dump(encoder, enc_file)
 
     return data, encoder, scaler
 
