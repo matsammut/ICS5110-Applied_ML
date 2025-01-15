@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, precision_score, f1_score, recall_score
+from sklearn.metrics import accuracy_score, precision_score, f1_score, recall_score,classification_report
 from sklearn.preprocessing import LabelEncoder, StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler, QuantileTransformer,OneHotEncoder
 import warnings
 from sklearn.metrics import confusion_matrix
@@ -138,48 +138,117 @@ results_df = pd.DataFrame(all_results)
 print("\nFinal Results Summary:")
 results_df.to_csv('Dataset_3_run2.csv', index=False)
 print(results_df)
+
 """
 
 #####################################
 
 
 print(f"Testing Scaling Method: {scaling_methods[scaling_method]}")
-        
+
+original_data_copy = data.copy()
 processed_data = Rescaling_experiments(data.copy(), numeric_cols, scaling_method=6)
 x = processed_data.drop(columns=['income'])
 y = processed_data['income']
+print(x.columns)
 
 
-print(x.head())
-print(y.head())
 # Single train-test split for final evaluation
 X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=SEED)
 
-
-
-DTC=RandomForestClassifier
+DTC = RandomForestClassifier
+#original best parameters 
 best_model = DTC(
-    n_estimators=1400,         # Number of trees in the forest
-    criterion='entropy',       # Split quality: 'entropy' for information gain
-    max_depth=96,              # Maximum depth of each tree
-    min_samples_split=50,      # Minimum number of samples required to split an internal node
-    min_samples_leaf=1,        # Minimum number of samples required to be at a leaf node
-    max_features='sqrt',       # Number of features to consider for splitting at each node ('sqrt' = square root of features)
-    bootstrap=True,            # Whether bootstrap samples are used when building trees
-    ccp_alpha=0.0,             # Complexity parameter for pruning (0.0 = no pruning)
-    class_weight=None,         # Weights associated with classes (None = all classes are weighted equally)
-    random_state=42            # Seed for reproducibility
+    n_estimators=150,
+    criterion='gini',
+    max_depth=13,
+    min_samples_split=4,
+    min_samples_leaf=2,
+    max_features='sqrt',
+    bootstrap=True,
+    ccp_alpha=0.0,
+    class_weight=None
 )
 
+best_model.fit(X_train, y_train)
 
-best_model.fit(X_train,y_train)
-###########################################################
-#predict the test set
-prediction=best_model.predict(X_test)
+# Predict the test set
+prediction = best_model.predict(X_test)
 
+# Overall performance metrics
 acc_score = accuracy_score(y_test, prediction)
-print(f"Accuracy: {acc_score}")
-joblib.dump(best_model, 'best_random_forest_model.joblib')
+print(f"Overall Accuracy: {acc_score}")
+
+# Analyze for different age groups
+for n in range(20, 100, 10):
+    # Filter based on age groups
+    test_indices = X_test.index
+    original_test_data = original_data_copy.loc[test_indices]
+    X_test_filtered = original_test_data[original_test_data['age'] < n]
+    y_test_filtered = y.loc[X_test_filtered.index]
+
+    predictions_filtered = best_model.predict(X_test.loc[X_test_filtered.index])
+
+    accuracy_filtered = accuracy_score(y_test_filtered, predictions_filtered)
+    precision_filtered = precision_score(y_test_filtered, predictions_filtered, average="weighted")
+    recall_filtered = recall_score(y_test_filtered, predictions_filtered, average="weighted")
+    f1_filtered = f1_score(y_test_filtered, predictions_filtered, average="weighted")
+
+    print(f"\nPerformance Metrics for Age < {n}:")
+    print(f"Accuracy: {accuracy_filtered}")
+    print(f"Precision: {precision_filtered}")
+    print(f"Recall: {recall_filtered}")
+    print(f"F1 Score: {f1_filtered}")
+
+# Analyze for different educational levels
+for edu_level in range(1, 17):
+    # Filter based on educational-num
+    X_test_filtered = original_test_data[original_test_data['educational-num'] == edu_level]
+    y_test_filtered = y.loc[X_test_filtered.index]
+
+    if len(X_test_filtered) > 0:  # Ensure there are samples for the specific educational level
+        predictions_filtered = best_model.predict(X_test.loc[X_test_filtered.index])
+
+        accuracy_filtered = accuracy_score(y_test_filtered, predictions_filtered)
+        precision_filtered = precision_score(y_test_filtered, predictions_filtered, average="weighted")
+        recall_filtered = recall_score(y_test_filtered, predictions_filtered, average="weighted")
+        f1_filtered = f1_score(y_test_filtered, predictions_filtered, average="weighted")
+
+        print(f"\nPerformance Metrics for Educational-Num = {edu_level}:")
+        print(f"Accuracy: {accuracy_filtered}")
+        print(f"Precision: {precision_filtered}")
+        print(f"Recall: {recall_filtered}")
+        print(f"F1 Score: {f1_filtered}")
+    else:
+        print(f"\nNo data for Educational-Num = {edu_level}")
+  
+# Analyze for different race groups
+race_columns = ['race_Amer-Indian-Eskimo', 'race_Asian-Pac-Islander', 'race_Black', 'race_Other', 'race_White']
+
+for race in race_columns:
+    # Filter for the specific race where the value is 1
+    X_test_filtered = original_test_data[original_test_data[race] == 1]
+    y_test_filtered = y.loc[X_test_filtered.index]
+
+    if len(X_test_filtered) > 0:  # Ensure there are samples for the specific race
+        predictions_filtered = best_model.predict(X_test.loc[X_test_filtered.index])
+
+        accuracy_filtered = accuracy_score(y_test_filtered, predictions_filtered)
+        precision_filtered = precision_score(y_test_filtered, predictions_filtered, average="weighted")
+        recall_filtered = recall_score(y_test_filtered, predictions_filtered, average="weighted")
+        f1_filtered = f1_score(y_test_filtered, predictions_filtered, average="weighted")
+
+        print(f"\nPerformance Metrics for {race}:")
+        print(f"Accuracy: {accuracy_filtered}")
+        print(f"Precision: {precision_filtered}")
+        print(f"Recall: {recall_filtered}")
+        print(f"F1 Score: {f1_filtered}")
+    else:
+        print(f"\nNo data for {race}") 
+
+
+"""
+joblib.dump(best_model, 'Random_forest.joblib')
 
 ###
 model = joblib.load('best_random_forest_model.joblib')
@@ -191,3 +260,4 @@ prediction = best_model.predict([[29.0, 32.0, 10.0, 1, 0.0, 0, 60.0, 0, 0.0, 0.0
                            0.003853627562193318, 0.7764769793931923, -0.05051009021640369, 
                            0.13568970638338268]])
 print(prediction[0])
+"""
