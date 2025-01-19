@@ -114,7 +114,7 @@ non_imputable = ['age', 'educational-num', 'race', 'gender', 'hours-per-week', '
 imputable_columns=['workclass','occupation','capital-gain']
 imputable_columns_knn_clasifier=['workclass','occupation']
 numeric_cols = ['age', 'educational-num', 'hours-per-week']
-feature_selected_out = ['fnlwgt','education']
+feature_selected_out = ['fnlwgt','education','marital-status','relationship']
 
 
 
