@@ -10,7 +10,7 @@ import warnings
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import cross_val_score, cross_validate
 import joblib
-
+import pickle
 warnings.filterwarnings("ignore")
 
 # Set global random seeds for reproducibility
@@ -43,7 +43,7 @@ def Rescaling_experiments(data, numeric_cols, scaling_method):
 # Objective Function for Optuna
 def objective(trial):
     params = {
-        'n_estimators': trial.suggest_int('n_estimators', 100, 1500, step=100),  # Smaller range
+        'n_estimators': trial.suggest_int('n_estimators', 100, 800, step=100),  # Smaller range
         'criterion': trial.suggest_categorical('criterion', ['gini', 'entropy']),
         'max_depth': trial.suggest_int('max_depth', 10, 100),  # Smaller range
         'min_samples_split': trial.suggest_int('min_samples_split', 2, 50),  # Narrowed range
@@ -145,7 +145,9 @@ print(results_df)
 
 
 print(f"Testing Scaling Method: {scaling_methods[scaling_method]}")
-
+with open('scaler.pkl', 'rb') as file:
+    scaler = pickle.load(file)
+data[['age', 'educational-num', 'hours-per-week']] = np.round(scaler.inverse_transform(data[['age', 'educational-num', 'hours-per-week']]))
 original_data_copy = data.copy()
 processed_data = Rescaling_experiments(data.copy(), numeric_cols, scaling_method=6)
 x = processed_data.drop(columns=['income'])
@@ -158,16 +160,17 @@ X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_
 
 DTC = RandomForestClassifier
 #original best parameters 
-best_model = DTC(
-    n_estimators=150,
+best_model = DTC( 
+    n_estimators=500,
     criterion='gini',
-    max_depth=13,
-    min_samples_split=4,
-    min_samples_leaf=2,
+    max_depth=200,
+    min_samples_split=50,
+    min_samples_leaf=50,
     max_features='sqrt',
     bootstrap=True,
     ccp_alpha=0.0,
     class_weight=None
+   
 )
 
 best_model.fit(X_train, y_train)
