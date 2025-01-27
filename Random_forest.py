@@ -11,6 +11,7 @@ from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import cross_val_score, cross_validate
 import joblib
 import pickle
+import matplotlib.pyplot as plt
 warnings.filterwarnings("ignore")
 
 # Set global random seeds for reproducibility
@@ -161,11 +162,11 @@ X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_
 DTC = RandomForestClassifier
 #original best parameters 
 best_model = DTC( 
-    n_estimators=500,
+    n_estimators=150,
     criterion='gini',
-    max_depth=200,
-    min_samples_split=50,
-    min_samples_leaf=50,
+    max_depth=13,
+    min_samples_split=4,
+    min_samples_leaf=2,
     max_features='sqrt',
     bootstrap=True,
     ccp_alpha=0.0,
@@ -182,72 +183,125 @@ prediction = best_model.predict(X_test)
 acc_score = accuracy_score(y_test, prediction)
 print(f"Overall Accuracy: {acc_score}")
 
-# Analyze for different age groups
-for n in range(20, 100, 10):
-    # Filter based on age groups
-    test_indices = X_test.index
-    original_test_data = original_data_copy.loc[test_indices]
-    X_test_filtered = original_test_data[original_test_data['age'] < n]
-    y_test_filtered = y.loc[X_test_filtered.index]
+# define the age ranges and features to analyse for for standard deviation 
+age_ranges = [(20, 30), (30, 40), (40, 50), (50, 60), (60, 70), (70, 80), (80, 90), (90, 100)]
+features_to_analyse = ['educational-num', 'gender', 'capital-gain', 'capital-loss', 'hours-per-week', 'native-country', 'income']
 
-    predictions_filtered = best_model.predict(X_test.loc[X_test_filtered.index])
+# Iterate through age ranges
+for lower, upper in age_ranges:
+    print(f"\nAnalyzing age range: {lower}-{upper}")
+    
+    # Filter test data for the current age range
+    age_filtered_data = original_data_copy.loc[X_test.index]
+    age_filtered_data = age_filtered_data[(lower <= age_filtered_data['age']) & (age_filtered_data['age'] < upper)]
+    print(age_filtered_data)
+    if age_filtered_data.empty:
+        print(f"No samples found in age range {lower}-{upper}")
+        continue
 
-    accuracy_filtered = accuracy_score(y_test_filtered, predictions_filtered)
-    precision_filtered = precision_score(y_test_filtered, predictions_filtered, average="weighted")
-    recall_filtered = recall_score(y_test_filtered, predictions_filtered, average="weighted")
-    f1_filtered = f1_score(y_test_filtered, predictions_filtered, average="weighted")
+    # Extract features and labels for the current age range
+    X_filtered = X_test.loc[age_filtered_data.index]
+    y_filtered = y_test.loc[age_filtered_data.index]
 
-    print(f"\nPerformance Metrics for Age < {n}:")
-    print(f"Accuracy: {accuracy_filtered}")
-    print(f"Precision: {precision_filtered}")
-    print(f"Recall: {recall_filtered}")
-    print(f"F1 Score: {f1_filtered}")
+    # Predictions and performance metrics
+    predictions = best_model.predict(X_filtered)
+    accuracy = accuracy_score(y_filtered, predictions)
+    precision = precision_score(y_filtered, predictions, average="weighted")
+    recall = recall_score(y_filtered, predictions, average="weighted")
+    f1 = f1_score(y_filtered, predictions, average="weighted")
 
-# Analyze for different educational levels
+    # Output metrics
+    print(f"Number of samples: {len(X_filtered)}")
+    print(f"Accuracy: {accuracy:.3f}")
+    print(f"Precision: {precision:.3f}")
+    print(f"Recall: {recall:.3f}")
+    print(f"F1 Score: {f1:.3f}")
+
+    # Calculate and output standard deviations for features
+    print("\nStandard Deviations:")
+    for feature in features_to_analyse:
+        std = (
+            y_filtered.std() if feature == 'income' 
+            else age_filtered_data[feature].std()
+        )
+        print(f"{feature}: {std:.3f}")
+
 for edu_level in range(1, 17):
-    # Filter based on educational-num
-    X_test_filtered = original_test_data[original_test_data['educational-num'] == edu_level]
-    y_test_filtered = y.loc[X_test_filtered.index]
+    print(f"\nAnalyzing Educational-Num = {edu_level}")
+    
+    # Filter data for the current educational level
+    filtered_data = original_data_copy.loc[original_data_copy.index.intersection(X_test.index)]
+    filtered_data = filtered_data[filtered_data['educational-num'] == edu_level]
+    if filtered_data.empty:
+        print(f"No data for Educational-Num = {edu_level}")
+        continue
 
-    if len(X_test_filtered) > 0:  # Ensure there are samples for the specific educational level
-        predictions_filtered = best_model.predict(X_test.loc[X_test_filtered.index])
+    # Extract features and labels for the current educational level
+    X_filtered = X_test.loc[filtered_data.index]
+    y_filtered = y.loc[filtered_data.index]
 
-        accuracy_filtered = accuracy_score(y_test_filtered, predictions_filtered)
-        precision_filtered = precision_score(y_test_filtered, predictions_filtered, average="weighted")
-        recall_filtered = recall_score(y_test_filtered, predictions_filtered, average="weighted")
-        f1_filtered = f1_score(y_test_filtered, predictions_filtered, average="weighted")
+    # Predictions and performance metrics
+    predictions = best_model.predict(X_filtered)
+    accuracy = accuracy_score(y_filtered, predictions)
+    precision = precision_score(y_filtered, predictions, average="weighted")
+    recall = recall_score(y_filtered, predictions, average="weighted")
+    f1 = f1_score(y_filtered, predictions, average="weighted")
 
-        print(f"\nPerformance Metrics for Educational-Num = {edu_level}:")
-        print(f"Accuracy: {accuracy_filtered}")
-        print(f"Precision: {precision_filtered}")
-        print(f"Recall: {recall_filtered}")
-        print(f"F1 Score: {f1_filtered}")
-    else:
-        print(f"\nNo data for Educational-Num = {edu_level}")
-  
+    # Output performance metrics
+    print(f"Number of samples: {len(filtered_data)}")
+    print(f"Accuracy: {accuracy:.3f}")
+    print(f"Precision: {precision:.3f}")
+    print(f"Recall: {recall:.3f}")
+    print(f"F1 Score: {f1:.3f}")
+
+    # Calculate and output standard deviations for features
+    print("\nStandard Deviations:")
+    for feature in features_to_analyse:
+        std = y_filtered.std() if feature == 'income' else filtered_data[feature].std()
+        print(f"{feature}: {std:.3f}")
+
+
+
+
+
 # Analyze for different race groups
+# Analyze performance for different race groups
 race_columns = ['race_Amer-Indian-Eskimo', 'race_Asian-Pac-Islander', 'race_Black', 'race_Other', 'race_White']
 
 for race in race_columns:
-    # Filter for the specific race where the value is 1
-    X_test_filtered = original_test_data[original_test_data[race] == 1]
-    y_test_filtered = y.loc[X_test_filtered.index]
+    print(f"\nAnalyzing performance for race: {race}")
 
-    if len(X_test_filtered) > 0:  # Ensure there are samples for the specific race
-        predictions_filtered = best_model.predict(X_test.loc[X_test_filtered.index])
+    # Filter data for the current race
+    filtered_data = original_data_copy.loc[X_test.index]
+    filtered_data = filtered_data[filtered_data[race] == 1]
 
-        accuracy_filtered = accuracy_score(y_test_filtered, predictions_filtered)
-        precision_filtered = precision_score(y_test_filtered, predictions_filtered, average="weighted")
-        recall_filtered = recall_score(y_test_filtered, predictions_filtered, average="weighted")
-        f1_filtered = f1_score(y_test_filtered, predictions_filtered, average="weighted")
+    if filtered_data.empty:
+        print(f"No data for {race}")
+        continue
 
-        print(f"\nPerformance Metrics for {race}:")
-        print(f"Accuracy: {accuracy_filtered}")
-        print(f"Precision: {precision_filtered}")
-        print(f"Recall: {recall_filtered}")
-        print(f"F1 Score: {f1_filtered}")
-    else:
-        print(f"\nNo data for {race}") 
+    # Extract features and labels for the current race
+    X_filtered = X_test.loc[filtered_data.index]
+    y_filtered = y_test.loc[filtered_data.index]
+
+    # Predictions and performance metrics
+    predictions = best_model.predict(X_filtered)
+    accuracy = accuracy_score(y_filtered, predictions)
+    precision = precision_score(y_filtered, predictions, average="weighted")
+    recall = recall_score(y_filtered, predictions, average="weighted")
+    f1 = f1_score(y_filtered, predictions, average="weighted")
+
+    # Output metrics
+    print(f"Number of samples: {len(filtered_data)}")
+    print(f"Accuracy: {accuracy:.3f}")
+    print(f"Precision: {precision:.3f}")
+    print(f"Recall: {recall:.3f}")
+    print(f"F1 Score: {f1:.3f}")
+
+    # Calculate and output standard deviations for features
+    print("\nStandard Deviations:")
+    for feature in features_to_analyse:
+        std = y_filtered.std() if feature == 'income' else filtered_data[feature].std()
+        print(f"{feature}: {std:.3f}")
 
 
 """

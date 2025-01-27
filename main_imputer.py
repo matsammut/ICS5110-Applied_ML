@@ -9,6 +9,10 @@ def cleaning_features(data, numeric_cols,drop_columns):
     scaler = StandardScaler()
     encoder = OneHotEncoder(sparse_output=False)
 
+    print(f"Number of duplicates: {data.duplicated().sum()}")
+    
+    data = data.drop_duplicates()
+    print(f"Number of duplicates: {data.duplicated().sum()}")
     data.replace({'?': np.nan, 99999: np.nan}, inplace=True)
     #check which columns have missing values
     
@@ -87,10 +91,3 @@ def adult_imputer(target_cols, k, data, numeric_cols):
     return data
 
 
-
-    print(data.isna().sum())
-    data=data.dropna()
-    
-    data[['age', 'educational-num', 'hours-per-week']] = np.round(scaler.inverse_transform(data[['age', 'educational-num', 'hours-per-week']]))   
-    print(data.isna().sum())
-    data.to_csv('Decision_tree_datasets/orignal_data_droped_nan_values.csv', index=False)
