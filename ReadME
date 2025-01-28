@@ -16,6 +16,9 @@
 ├── wcc_occ_encoding_reduction.ipynb    # Notebook that does PCA on imputed_dataset to transform it to dataset.csv
 └── README.md
 
+Group -
+Matteo Sammut, Andrea Gariboldi, Jan Borg
+
 Links -
 Kaggle Adult Income Dataset:
 https://www.kaggle.com/datasets/wenruliu/adult-income-dataset/data?fbclid=IwZXh0bgNhZW0CMTEAAR0w2vb9hG7eyZtqulRQYpm9Gj_V9PkyhzuYSIgeAbfAtOaZcAdtqHfd058_aem_YheJ6GWorXgoNFv4gGYsgw
