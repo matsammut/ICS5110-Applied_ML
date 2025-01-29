@@ -10,16 +10,15 @@ def cleaning_features(data, numeric_cols,drop_columns):
     encoder = OneHotEncoder(sparse_output=False)
 
     data.replace({'?': np.nan, 99999: np.nan}, inplace=True)
-    #check which columns have missing values
     
-    # 1. Scale numerical features
+
     data[numeric_cols] = scaler.fit_transform(data[numeric_cols])
 
-    # 2. Label encode gender and income
+
     data['gender'] = le.fit_transform(data['gender'])
     data['income'] = le.fit_transform(data['income'])
-   # data['workclass'] = le.fit_transform(data['workclass'])
 
+   # data['workclass'] = le.fit_transform(data['workclass'])
     with open('label_encoder_work.pkl', 'wb') as le_file:
         pickle.dump(le, le_file)
 
@@ -27,7 +26,7 @@ def cleaning_features(data, numeric_cols,drop_columns):
     with open('label_encoder_occ.pkl', 'wb') as le_file:
         pickle.dump(le, le_file)
     
-    #columns_to_encode = ['race','marital-status','relationship']
+
     columns_to_encode = ['race']
     # 3. One-hot encode race
     for N in columns_to_encode:
@@ -87,10 +86,3 @@ def adult_imputer(target_cols, k, data, numeric_cols):
     return data
 
 
-
-    print(data.isna().sum())
-    data=data.dropna()
-    
-    data[['age', 'educational-num', 'hours-per-week']] = np.round(scaler.inverse_transform(data[['age', 'educational-num', 'hours-per-week']]))   
-    print(data.isna().sum())
-    data.to_csv('Decision_tree_datasets/orignal_data_droped_nan_values.csv', index=False)

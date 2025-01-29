@@ -1,0 +1,33 @@
+.
+├── ann                                 # Folder containing ANN notebook and model
+│   ├── ann_model.h5                    # ANN model exported for site
+│   ├── ann.ipynb                       # ANN notebook
+├── hdbscan                             # Folder containing HDBSCAN deliverables
+│   ├── optuna_runs                     # Folder containing some hdbscan runs
+│   ├── hdbscan.ipynb                   # HDBSCAN notebook and model
+├── Ramdom_forest_results               # Folder containing RF notebook, model and main
+│   ├── Random_Fprest.ipynb             # RF Notebook used to export model
+│   ├── Random_Fprest.py                # RF Main used for experiments
+├── adult.csv                           # Original dataset obtained from Kaggle
+├── dataset.csv                         # Dataset after data preperation
+├── imputed_dataset.csv                 # Dataset after imputation but before PCA to transform it to dataset.csv
+├── main_imputer.py                     # Function used for imputation and data cleaning
+├── main.py                             # Main uses the tools in main_imputer for the data preperation step
+├── wcc_occ_encoding_reduction.ipynb    # Notebook that does PCA on imputed_dataset to transform it to dataset.csv
+└── README.md
+
+Group -
+Matteo Sammut, Andrea Gariboldi, Jan Borg
+
+Links -
+Kaggle Adult Income Dataset:
+https://www.kaggle.com/datasets/wenruliu/adult-income-dataset/data?fbclid=IwZXh0bgNhZW0CMTEAAR0w2vb9hG7eyZtqulRQYpm9Gj_V9PkyhzuYSIgeAbfAtOaZcAdtqHfd058_aem_YheJ6GWorXgoNFv4gGYsgw
+
+Hugging Face Repo:
+https://huggingface.co/spaces/matsammut/ICS5110-Applied_ML
+
+GitHub Repo:
+https://github.com/matsammut/ICS5110-Applied_ML
+
+GitHub Pages Site:
+https://matsammut.github.io/ICS5110-Applied_ML/
